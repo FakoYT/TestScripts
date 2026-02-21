@@ -695,6 +695,7 @@ function CleanUpUselessParts()
 				mPart.PrimaryPart.CFrame = TrashPart.PrimaryPart.CFrame
 				task.wait(0.2)
 			end
+			DebugPrint("Cleaned up useless parts")
 		end
 		
 	end
@@ -702,7 +703,15 @@ end
 
 function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 	for index, Rpart in pairs(ToGrindParts) do
-		Rpart.PrimaryPart.CFrame = GMachinesTable[index]:FindFirstChild("Detector").CFrame
+		local Detector = GMachinesTable[index]:FindFirstChild("Detector")
+		if not Detector then
+			repeat
+				Player:RequestStreamAroundAsync(GMachinesTable[index]:GetModelCFrame().Position)
+				task.wait(0.4)
+			until GMachinesTable[index]:FindFirstChild("Detector")
+		end
+		Detector = GMachinesTable[index]:FindFirstChild("Detector")
+		Rpart.PrimaryPart.CFrame = Detector.CFrame
 		task.wait(0.2)
 		local Button = GMachinesTable[index]:FindFirstChild("Button")
 		local ParticleE = GMachinesTable[index]:FindFirstChild("Drill"):FindFirstChild("Attachment"):FindFirstChild("CUTS")
@@ -710,7 +719,7 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 			repeat
 				fireclickdetector(Button:FindFirstChild("ClickDetector"))
 				task.wait(0.2)
-				Rpart.PrimaryPart.CFrame = GMachinesTable[index]:FindFirstChild("Detector").CFrame
+				Rpart.PrimaryPart.CFrame = Detector.CFrame
 			until ParticleE.Enabled == true or AutoFarm == false
 			if AutoFarm == false then
 				return false
@@ -725,7 +734,15 @@ end
 
 function StartWashingMachines(ToWashParts, PWashersTable, RepairingParts)
 	for index, Rpart in pairs(ToWashParts) do
-		Rpart.PrimaryPart.CFrame = PWashersTable[index]:FindFirstChild("Detector").CFrame
+		local Detector = PWashersTable[index]:FindFirstChild("Detector")
+		if not Detector then
+			repeat
+				Player:RequestStreamAroundAsync(PWashersTable[index]:GetModelCFrame().Position)
+				task.wait(0.4)
+			until PWashersTable[index]:FindFirstChild("Detector")
+		end
+		Detector = PWashersTable[index]:FindFirstChild("Detector")
+		Rpart.PrimaryPart.CFrame = Detector.CFrame
 		task.wait(0.2)
 		local Button = PWashersTable[index]:WaitForChild("Faucet")
 		local ParticleE = PWashersTable[index]:FindFirstChild("Water"):FindFirstChild("Attachment"):FindFirstChild("MAIN SPRAY")
@@ -748,6 +765,15 @@ end
 
 function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 	for index, Rpart in pairs(ToChargeParts) do
+		local Detector = BChargersTable[index]:FindFirstChild("Detector")
+		if not Detector then
+			repeat
+				Player:RequestStreamAroundAsync(BChargersTable[index]:GetModelCFrame().Position)
+				task.wait(0.4)
+			until BChargersTable[index]:FindFirstChild("Detector")
+		end
+		Detector = BChargersTable[index]:FindFirstChild("Detector")
+		Rpart.PrimaryPart.CFrame = Detector.CFrame
 		Rpart.PrimaryPart.CFrame = BChargersTable[index]:FindFirstChild("Detector").CFrame
 		task.wait(0.2)
 		local Button = BChargersTable[index]:FindFirstChild("Button")
