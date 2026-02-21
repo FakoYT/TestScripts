@@ -542,12 +542,12 @@ function SellCar(Vehicle) -- sells car
 		if AutoFarm == false then
 			return false
 		end
-		Map = Map:FindFirstChild("SellCar")
+		SellCargGuy = Map:FindFirstChild("SellCar")
 	end
 	
 	local SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	if not SellCarGuyHRP then
-		DebugWarn("SellCar guy HumanoidRootPart not found, requesting stream (updated)")
+		DebugWarn("SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
 		repeat
 			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
 			task.wait(0.2)
@@ -555,7 +555,7 @@ function SellCar(Vehicle) -- sells car
 		if AutoFarm == false then
 			return false
 		end
-		Map = SellCargGuy:FindFirstChild("HumanoidRootPart")
+		SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	end
 	
 	local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
