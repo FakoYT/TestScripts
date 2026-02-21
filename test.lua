@@ -535,12 +535,10 @@ function SellCar(Vehicle) -- sells car
 	local SellCargGuy = Map:FindFirstChild("SellCar")
 	if not SellCargGuy then
 		DebugWarn("SellCar guy not found, requesting stream")
-		local RepeatTimes = 0
 		repeat
 			Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
 			task.wait(0.2)
-			RepeatTimes += 1
-		until Map:FindFirstChild("SellCar") or RepeatTimes > 10 or AutoFarm == false
+		until Map:FindFirstChild("SellCar") or AutoFarm == false
 		if AutoFarm == false then
 			return false
 		end
@@ -550,12 +548,10 @@ function SellCar(Vehicle) -- sells car
 	local SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	if not SellCarGuyHRP then
 		DebugWarn("SellCar guy HumanoidRootPart not found, requesting stream")
-		local RepeatTimes = 0
 		repeat
 			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
 			task.wait(0.2)
-			RepeatTimes += 1
-		until SellCargGuy:FindFirstChild("HumanoidRootPart") or RepeatTimes > 10 or AutoFarm == false
+		until SellCargGuy:FindFirstChild("HumanoidRootPart") or AutoFarm == false
 		if AutoFarm == false then
 			return false
 		end
