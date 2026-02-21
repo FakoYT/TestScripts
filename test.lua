@@ -973,6 +973,7 @@ end
 
 function BuyBestCar()
 	local BestCar = FindBestCar()
+	print("Best car 1 - ", BestCar)
 	if BestCar then
 		local BestCarEngine = BestCar:FindFirstChild("Body"):FindFirstChild("Engine")
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
@@ -980,6 +981,7 @@ function BuyBestCar()
 			ClickD.MaxActivationDistance = 1000
 			repeat
 				local BestCar = FindBestCar()
+				print("Best car 2 - ", BestCar)
 				local BestCarEngine = BestCar:FindFirstChild("Body"):FindFirstChild("Engine")
 				local ClickD = BestCar:FindFirstChild("ClickDetector")
 				if BestCarEngine and ClickD then
