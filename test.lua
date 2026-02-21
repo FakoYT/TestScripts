@@ -462,7 +462,7 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 				end
 			end
 			
-			task.wait(0.2)
+			task.wait(0.3)
 			attempts = attempts + 1
 			
 			local distance = (seat.Position - targetCFrame.Position).Magnitude
@@ -534,17 +534,32 @@ function SellCar(Vehicle) -- sells car
 	end
 	local SellCargGuy = Map:FindFirstChild("SellCar")
 	if not SellCargGuy then
-		-- Load sell car guy
 		DebugWarn("SellCar guy not found, requesting stream")
-		Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
-		return false
+		local RepeatTimes = 0
+		repeat
+			Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
+			task.wait(0.2)
+			RepeatTimes += 1
+		until Map:FindFirstChild("SellCar") or RepeatTimes > 10 or AutoFarm == false
+		if AutoFarm == false then
+			return false
+		end
+		Map = Map:FindFirstChild("SellCar")
 	end
+	
 	local SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	if not SellCarGuyHRP then
-		-- Load sell car guy
-		DebugWarn("SellCar guy HRP not found, requesting stream")
-		Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
-		return false
+		DebugWarn("SellCar guy HumanoidRootPart not found, requesting stream")
+		local RepeatTimes = 0
+		repeat
+			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
+			task.wait(0.2)
+			RepeatTimes += 1
+		until SellCargGuy:FindFirstChild("HumanoidRootPart") or RepeatTimes > 10 or AutoFarm == false
+		if AutoFarm == false then
+			return false
+		end
+		Map = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	end
 	
 	local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
@@ -1060,6 +1075,11 @@ function BuyBestCar()
 	end
 end
 
+--[[
+Later add here table with current cars that script will be running (their unique names) and check if they were already
+fake driving distance - it true then sell them and don't run it again
+]]--
+
 while true do
 	if AutoFarm == true then
 		local currentCar = GetCurrentCar()
@@ -1105,11 +1125,13 @@ while true do
 
 				if AutoFarm == true then
 					DebugPrint("Status: Selling car...")
+					teleportBrokenCar(currentCar, SafePlaceAfterStop)
+					task.wait(0.2)
 					local sold = SellCar(currentCar)
 					if sold then
 						print("--- CAR SOLD ---")
 						task.wait(1)
-						CleanUpUselessParts()
+						CleanUpUselessParts() -- not working I think
 					else
 						DebugWarn("Selling error, retrying...")
 					end
