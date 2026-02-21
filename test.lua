@@ -973,17 +973,43 @@ end
 
 function BuyBestCar()
 	local BestCar = FindBestCar()
-	print("Best car 1 - ", BestCar)
 	if BestCar then
-		local BestCarEngine = BestCar:FindFirstChild("Body"):FindFirstChild("Engine")
+		local BestCarBody = BestCar:FindFirstChild("Body")
+		if not BestCarBody then
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			return false
+		end
+		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
+		if not BestCarEngine then
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			return false
+		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
+		if not ClickD then
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			return false
+		end
+		
 		if BestCarEngine and ClickD then
 			ClickD.MaxActivationDistance = 1000
 			repeat
 				local BestCar = FindBestCar()
-				print("Best car 2 - ", BestCar)
-				local BestCarEngine = BestCar:FindFirstChild("Body"):FindFirstChild("Engine")
+				local BestCarBody = BestCar:FindFirstChild("Body")
+				if not BestCarBody then
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					return false
+				end
+				local BestCarEngine = BestCarBody:FindFirstChild("Engine")
+				if not BestCarEngine then
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					return false
+				end
 				local ClickD = BestCar:FindFirstChild("ClickDetector")
+				if not ClickD then
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					return false
+				end
+				
 				if BestCarEngine and ClickD then
 					ClickD.MaxActivationDistance = 1000
 					TeleportOnlyPlayer(BestCarEngine.CFrame)
@@ -1000,6 +1026,7 @@ function BuyBestCar()
 			end
 			return true
 		else
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
 			return false
 		end
 	else
