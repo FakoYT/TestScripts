@@ -288,7 +288,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 				ParticleE = nil
 				if MachineName == "GrindingMachine" then
 					repeat
-						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().p)
 						task.wait(0.3)
 						local drill = v:FindFirstChild("Drill")
 						local att = drill and drill:FindFirstChild("Attachment")
@@ -297,7 +297,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 					
 				elseif MachineName == "BatteryCharger" then
 					repeat
-						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().p)
 						task.wait(0.3)
 						local clamps = v:FindFirstChild("Clamps")
 						local neg = clamps and clamps:FindFirstChild("Negative")
@@ -308,7 +308,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 					
 				elseif MachineName == "PartsWasher" then
 					repeat
-						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().p)
 						task.wait(0.3)
 						local water = v:FindFirstChild("Water")
 						local att = water and water:FindFirstChild("Attachment")
@@ -668,7 +668,7 @@ function SellCar(Vehicle) -- sells car
 		end
 	else
 		if game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar") then
-			Player:RequestStreamAroundAsync(game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):GetModelCFrame().p)
 		end
 		return false
 	end
@@ -772,7 +772,7 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 		local Detector = GMachinesTable[index]:FindFirstChild("Detector")
 		if not Detector then
 			repeat
-				Player:RequestStreamAroundAsync(GMachinesTable[index]:GetModelCFrame().Position)
+				Player:RequestStreamAroundAsync(GMachinesTable[index]:GetModelCFrame().p)
 				task.wait(0.4)
 			until GMachinesTable[index]:FindFirstChild("Detector")
 		end
@@ -803,7 +803,7 @@ function StartWashingMachines(ToWashParts, PWashersTable, RepairingParts)
 		local Detector = PWashersTable[index]:FindFirstChild("Detector")
 		if not Detector then
 			repeat
-				Player:RequestStreamAroundAsync(PWashersTable[index]:GetModelCFrame().Position)
+				Player:RequestStreamAroundAsync(PWashersTable[index]:GetModelCFrame().p)
 				task.wait(0.4)
 			until PWashersTable[index]:FindFirstChild("Detector")
 		end
@@ -834,7 +834,7 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 		local Detector = BChargersTable[index]:FindFirstChild("Detector")
 		if not Detector then
 			repeat
-				Player:RequestStreamAroundAsync(BChargersTable[index]:GetModelCFrame().Position)
+				Player:RequestStreamAroundAsync(BChargersTable[index]:GetModelCFrame().p)
 				task.wait(0.4)
 			until BChargersTable[index]:FindFirstChild("Detector")
 		end
@@ -1069,19 +1069,19 @@ function BuyBestCar()
 		local BestCarBody = BestCar:FindFirstChild("Body")
 		if not BestCarBody then
 			DebugWarn("[BuyBestCar] - Best car body not found, requesting stream...")
-			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 			return false
 		end
 		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		if not BestCarEngine then
 			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream...")
-			Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
 			return false
 		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
 		if not ClickD then
 			DebugWarn("[BuyBestCar] - Best car ClickDetector not found, requesting stream...")
-			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 			return false
 		end
 		
@@ -1091,17 +1091,17 @@ function BuyBestCar()
 				local BestCar = FindBestCar()
 				local BestCarBody = BestCar:FindFirstChild("Body")
 				if not BestCarBody then
-					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 					return false
 				end
 				local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 				if not BestCarEngine then
-					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 					return false
 				end
 				local ClickD = BestCar:FindFirstChild("ClickDetector")
 				if not ClickD then
-					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 					return false
 				end
 				
@@ -1121,7 +1121,7 @@ function BuyBestCar()
 			end
 			return true
 		else
-			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
 			return false
 		end
 	else
