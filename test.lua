@@ -1189,7 +1189,6 @@ while true do
 					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(FoundCar, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
 					task.wait(0.2)	
 				else
-					print("Setting to nil")
 					WorkingOnCurrentCar = nil
 				end
 			end
@@ -1197,7 +1196,6 @@ while true do
 			local EnginePart = currentCar:WaitForChild("Body"):FindFirstChild("Engine")
 			if EnginePart then
 				WorkingOnCurrentCar = currentCar.Name
-				print(WorkingOnCurrentCar)
 				PaintCar(currentCar)
 				local condition = GetCarCondition(currentCar)
 				local vParts = GetVehicleParts(currentCar) or {}
