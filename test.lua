@@ -428,12 +428,12 @@ function GetToMachineParts(Parts, Machine) -- Returns all parts that can be used
 	return nil
 end
 
-function PainCar(Vehicle) -- Paint car if rusted
+function PaintCar(Vehicle) -- Paint car if rusted
 	local ValuesFolder = Vehicle:FindFirstChild("Values")
-	if Player.Character then
-		if Player.Character:FindFirstChild("Humanoid") then
-			Player.Character.Humanoid.Sit = false
-		end
+	local Character = Player.Character
+	local Humanoid = Character:FindFirstChild("Humanoid")
+	if Character and Humanoid then
+		Humanoid.Sit = false
 	end
 	task.wait()
 	if ValuesFolder then
@@ -444,6 +444,27 @@ function PainCar(Vehicle) -- Paint car if rusted
 				if PaintRemote then
 					DebugPrint("Painting car")
 					PaintRemote:FireServer("Car", Vehicle, Color3.new(0.129412, 0.129412, 0.129412))
+					task.wait(0.2)
+					if string.find(PaintColor.Value, "Rust") then
+						repeat
+							if Character and Humanoid then
+								task.wait(0.3)
+								Humanoid.Sit = false
+								task.wait(0.1)
+								if string.find(PaintColor.Value, "Rust") then
+									PaintRemote:FireServer("Car", Vehicle, Color3.new(0.129412, 0.129412, 0.129412))
+								end
+							else
+								break
+							end
+						until not string.find(PaintColor.Value, "Rust") or AutoFarm == false
+						if AutoFarm == false then
+							return false
+						end
+						return true
+					else
+						return true
+					end
 				end
 			else
 				DebugPrint("Car already painted")
@@ -1163,7 +1184,7 @@ while true do
 			end
 		else
 			WorkingOnCurrentCar = currentCar
-			PainCar(currentCar)
+			PaintCar(currentCar)
 			local condition = GetCarCondition(currentCar)
 			local vParts = GetVehicleParts(currentCar) or {}
 			
