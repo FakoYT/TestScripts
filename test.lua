@@ -1175,10 +1175,16 @@ while true do
 				DebugPrint("Worked on car - ".. WorkingOnCurrentCar)
 				-- Check if car in garage, if not then set WorkingOnCurrentCar to nil, if there is - fire event that will spawn it
 				local OwnedCarsTable = GetOwnedCars()
-				local FindCarIndex = table.find(OwnedCarsTable, WorkingOnCurrentCar)
-				if OwnedCarsTable and FindCarIndex then
+				local FoundCar = nil
+				for _, ownedCar in pairs(OwnedCarsTable) do
+					if ownedCar.Name == WorkingOnCurrentCar then
+						FoundCar = ownedCar
+					end
+				end
+				
+				if OwnedCarsTable and FoundCar then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
-					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(FoundCar, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
 					task.wait(0.2)	
 				else
 					print("Setting to nil")
@@ -1246,11 +1252,20 @@ while true do
 				end
 			else
 				local OwnedCarsTable = GetOwnedCars()
-				local FindCarIndex = table.find(OwnedCarsTable, WorkingOnCurrentCar)
-				if OwnedCarsTable and FindCarIndex then
+				local FoundCar = nil
+				for _, ownedCar in pairs(OwnedCarsTable) do
+					if ownedCar.Name == WorkingOnCurrentCar then
+						FoundCar = ownedCar
+					end
+				end
+
+				if OwnedCarsTable and FoundCar then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
-					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
-					task.wait(0.2)
+					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(FoundCar, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+					task.wait(0.2)	
+				else
+					print("Setting to nil")
+					WorkingOnCurrentCar = nil
 				end
 			end
 		end
