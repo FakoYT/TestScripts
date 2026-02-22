@@ -1162,9 +1162,10 @@ local WorkingOnCurrentCar = nil
 while true do
 	if AutoFarm == true then
 		local currentCar = GetCurrentCar()
+		local EnginePart = currentCar:WaitForChild("Body"):FindFirstChild("Engine")
 
 		if not currentCar then
-			if not WorkingOnCurrentCar then
+			if not WorkingOnCurrentCar and EnginePart then
 				DebugPrint("Status: No car - buying new...")
 				local bought = BuyBestCar()
 				if not bought then
