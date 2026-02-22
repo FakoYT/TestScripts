@@ -10,6 +10,7 @@ end
 nbvcuytrkijuhygt.Name = "nbvcuytrkijuhygt"
 nbvcuytrkijuhygt.Parent = game.CoreGui
 nbvcuytrkijuhygt.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+nbvcuytrkijuhygt.ResetOnSpawn = false
 
 ActiveBtn.Name = "ActiveBtn"
 ActiveBtn.Parent = nbvcuytrkijuhygt
@@ -55,6 +56,9 @@ local SearchedForName = "PitStop Repair2"
 local MapFolder = game.Workspace:FindFirstChild("Map")
 local SecondsToSell = 0
 local DebugP = true
+local JunkYardPos1 = CFrame.new(-1642, 5, -116)
+local JunkYardPos2 = CFrame.new(-1799, 5, -354)
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 --Load repair station
 Player:RequestStreamAroundAsync(Vector3.new(-832.043, 9.40005, -1300.34))
@@ -66,8 +70,8 @@ Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
 local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
 
 -- DELETING MAYBE ANTICHEAT LOGS
-local Logs = game.ReplicatedStorage:WaitForChild("Events"):FindFirstChild("ServerLogs")
-local Webbhoks = game.ReplicatedStorage:FindFirstChild("SmurklesLib"):FindFirstChild("Modules"):FindFirstChild("DiscordWebhook")
+local Logs = ReplicatedStorage:WaitForChild("Events"):FindFirstChild("ServerLogs")
+local Webbhoks = ReplicatedStorage:FindFirstChild("SmurklesLib"):FindFirstChild("Modules"):FindFirstChild("DiscordWebhook")
 if Logs then
 	Logs:Destroy()
 end
@@ -76,16 +80,12 @@ if Webbhoks then
 end
 
 -- AutoConfirm
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local ConfirmationRemote = ReplicatedStorage:WaitForChild("Events"):WaitForChild("HUD"):WaitForChild("Confirmation")
 
 ConfirmationRemote.OnClientInvoke = function(message)
-
-	if string.find(string.lower(message), "sell") or string.find(string.lower(message), "sprzedać") then
+	if AutoFarm == true then
 		return true
 	end
-
-	return true 
 end
 
 -- Rename Pitstops
@@ -98,18 +98,20 @@ for _, v in pairs(MapFolder:GetChildren()) do
 end
 
 -- Sell Delay detection
-Player.CharacterAdded:Connect(function(character)
-	Player.PlayerGui:WaitForChild("HUD"):WaitForChild("Notifications").ChildAdded:Connect(function(textL)
-		if textL.ClassName == "TextLabel" then
-			if string.find(textL.Text, "seconds to sell this car") then
-				local FirstCrop = string.gsub(textL.Text, "You need to wait ", "")
-				local SecondCrop = string.gsub(FirstCrop, " seconds to sell this car", "")
-				local Seconds = tonumber(SecondCrop)
-				--print("You need to wait ".. tostring(Seconds))
-				SecondsToSell = Seconds + 1
+Player.PlayerGui.ChildAdded:Connect(function(gui)
+	if gui.Name == "HUD" then
+		gui:WaitForChild("Notifications").ChildAdded:Connect(function(textL)
+			if textL.ClassName == "TextLabel" then
+				if string.find(textL.Text, "seconds to sell this car") then
+					local FirstCrop = string.gsub(textL.Text, "You need to wait ", "")
+					local SecondCrop = string.gsub(FirstCrop, " seconds to sell this car", "")
+					local Seconds = tonumber(SecondCrop)
+					--print("You need to wait ".. tostring(Seconds))
+					SecondsToSell = Seconds + 1
+				end
 			end
-		end
-	end)
+		end)
+	end
 end)
 
 Player.PlayerGui:WaitForChild("HUD"):WaitForChild("Notifications").ChildAdded:Connect(function(textL)
@@ -437,7 +439,7 @@ function PainCar(Vehicle) -- Paint car if rusted
 		local PaintColor = ValuesFolder:FindFirstChild("PaintColor")
 		if PaintColor then
 			if string.find(PaintColor.Value, "Rust") then
-				local PaintRemote = game.ReplicatedStorage:FindFirstChild("Events"):FindFirstChild("Vehicles"):FindFirstChild("SetPaint")
+				local PaintRemote = ReplicatedStorage:FindFirstChild("Events"):FindFirstChild("Vehicles"):FindFirstChild("SetPaint")
 				if PaintRemote then
 					DebugPrint("Painting car")
 					PaintRemote:FireServer("Car", Vehicle, Color3.new(0.129412, 0.129412, 0.129412))
@@ -511,8 +513,18 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 end
 
 function FindBestCar() -- returns the most expensive car that can be bought
-	local Vehicles = game.Workspace:WaitForChild("Vehicles")
-	local Money = tonumber(game.Players.LocalPlayer:WaitForChild("PlayerData"):WaitForChild("Status"):WaitForChild("Money").value)
+	Player:RequestStreamAroundAsync(JunkYardPos1.Position)
+	task.wait()
+	Player:RequestStreamAroundAsync(JunkYardPos2.Position)
+	task.wait(0.1)
+	
+	local Vehicles = game.Workspace:WaitForChild("Vehicles", 5)
+	if not Vehicles then 
+		DebugWarn("[FindBestCar] - Vehicles folder not found1")
+		return nil 
+	end
+	local MoneyVal = game.Players.LocalPlayer:WaitForChild("PlayerData"):WaitForChild("Status"):WaitForChild("Money")
+	local Money = tonumber(MoneyVal.Value) or 0
 	local bestCar = nil
 	local MaxCost = 0
 
@@ -1055,16 +1067,19 @@ function BuyBestCar()
 	if BestCar then
 		local BestCarBody = BestCar:FindFirstChild("Body")
 		if not BestCarBody then
+			DebugWarn("[BuyBestCar] - Best car body not found, requesting stream...")
 			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
 			return false
 		end
 		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		if not BestCarEngine then
+			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream...")
 			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
 			return false
 		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
 		if not ClickD then
+			DebugWarn("[BuyBestCar] - Best car ClickDetector not found, requesting stream...")
 			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
 			return false
 		end
@@ -1129,17 +1144,18 @@ while true do
 				DebugPrint("Status: No car - buying new...")
 				local bought = BuyBestCar()
 				if not bought then
-					DebugWarn("[Main loop] - Could not buy a car - waiting 5s")
+					DebugWarn("[Main loop] - Could not buy a car - waiting 2s")
 					task.wait(2)
 				end
 			else
+				DebugPrint("Worked on car - " , WorkingOnCurrentCar)
 				-- Check if car in garage, if not then set WorkingOnCurrentCar to nil, if there is - fire event that will spawn it
 				local OwnedCarsTable = GetOwnedCars()
 				local FindCarIndex = table.find(GetOwnedCars(), WorkingOnCurrentCar)
 				if FindCarIndex then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
 					
-					game:GetService("ReplicatedStorage").Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
 				else
 					WorkingOnCurrentCar = nil
 				end
