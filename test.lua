@@ -567,7 +567,7 @@ function SellCar(Vehicle) -- sells car
 	end
 	local SellCargGuy = Map:FindFirstChild("SellCar")
 	if not SellCargGuy then
-		DebugWarn("SellCar guy not found, requesting stream")
+		DebugWarn("[SellCar] - SellCar guy not found, requesting stream")
 		repeat
 			Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
 			task.wait(0.2)
@@ -580,7 +580,7 @@ function SellCar(Vehicle) -- sells car
 	
 	local SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	if not SellCarGuyHRP then
-		DebugWarn("SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
+		DebugWarn("[SellCar] - SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
 		repeat
 			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
 			task.wait(0.2)
@@ -687,7 +687,7 @@ function InstallAllParts(CurrentCar) -- Installs every part on the ground to the
 			end
 
 			if not success then
-				DebugWarn("Could not install engine block!")
+				DebugWarn("[InstallAllParts] - Could not install engine block!")
 				return false
 			end
 		end
@@ -732,7 +732,7 @@ function CleanUpUselessParts()
 		for _, mPart in pairs(MoveableParts:GetChildren()) do
 			if mPart:FindFirstChild("PartInfo") then
 				local Owner = mPart:GetAttribute("Owner")
-				if Owner == Player.Name and mPart.Name == "Injectors" and mPart.Name == "Sparkplugs" and mPart.Name == "TimingBelt" then
+				if Owner == Player.Name and mPart.Name == "Injectors" or mPart.Name == "Sparkplugs" or mPart.Name == "TimingBelt" then
 					table.insert(Parts, mPart)
 				end
 			end
@@ -740,8 +740,13 @@ function CleanUpUselessParts()
 		
 		if #Parts > 0 and #Parts > 5 then
 			for _, mPart in pairs(Parts) do
-				mPart.PrimaryPart.CFrame = TrashPart.PrimaryPart.CFrame
-				task.wait(0.2)
+				if mPart.PrimaryPart then
+					mPart.PrimaryPart.CFrame = TrashPart.PrimaryPart.CFrame
+					task.wait(0.2)
+				else
+					DebugWarn("[CleanUpUselessParts] - No primary part for part: " .. mPart.Name)
+				end
+				
 			end
 			DebugPrint("Cleaned up useless parts")
 		end
@@ -1124,7 +1129,7 @@ while true do
 				DebugPrint("Status: No car - buying new...")
 				local bought = BuyBestCar()
 				if not bought then
-					DebugWarn("Could not buy a car - waiting 5s")
+					DebugWarn("[Main loop] - Could not buy a car - waiting 5s")
 					task.wait(2)
 				end
 			else
@@ -1152,7 +1157,7 @@ while true do
 				for _, RequiredPart in pairs(RequiredParts) do
 					if not table.find(vParts, RequiredPart) then
 						MissingCriticalPart = true
-						DebugWarn("Critical part missing: " .. RequiredPart)
+						DebugWarn("[Main Loop] - Critical part missing: " .. RequiredPart)
 						break
 					end
 				end
@@ -1162,7 +1167,7 @@ while true do
 				DebugPrint("Status: Car needs repair (Condition: " .. condition .. "%)")
 				local success = FixParts()
 				if not success then
-					DebugWarn("Something went wrong while fixing parts, retrying...")
+					DebugWarn("[Main Loop] - Something went wrong while fixing parts, retrying...")
 				end
 			else
 				if condition <= 0 or MissingCriticalPart then
@@ -1173,7 +1178,7 @@ while true do
 				if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
 					local AutoDrive = DriveDistance(currentCar, 1.2)
 					if not AutoDrive then
-						DebugWarn("Something went wrong while driving.")
+						DebugWarn("[Main Loop] - Something went wrong while driving.")
 					else
 						table.insert(AlreadyDrivenCars, currentCar.Name)
 					end
@@ -1191,7 +1196,7 @@ while true do
 						task.wait(1)
 						CleanUpUselessParts() -- not working I think
 					else
-						DebugWarn("Selling error, retrying...")
+						DebugWarn("[Main Loop] - Selling error, retrying...")
 					end
 				end
 			end
