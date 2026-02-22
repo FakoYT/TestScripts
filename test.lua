@@ -282,7 +282,40 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 				end
 			else
 				DebugPrint("not loaded yet, requesting stream")
-				Player:RequestStreamAroundAsync(v.PrimaryPart and v.PrimaryPart.Position or v:GetModelCFrame().Position)
+				ParticleE = nil
+				if MachineName == "GrindingMachine" then
+					repeat
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						task.wait(0.3)
+						local drill = v:FindFirstChild("Drill")
+						local att = drill and drill:FindFirstChild("Attachment")
+						ParticleE = att and att:FindFirstChild("CUTS")
+					until ParticleE or AutoFarm == false
+					
+				elseif MachineName == "BatteryCharger" then
+					repeat
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						task.wait(0.3)
+						local clamps = v:FindFirstChild("Clamps")
+						local neg = clamps and clamps:FindFirstChild("Negative")
+						local clamp = neg and neg:FindFirstChild("Clamp")
+						local primary = clamp and clamp:FindFirstChild("Primary")
+						ParticleE = primary and primary:FindFirstChild("Particles")	
+					until ParticleE or AutoFarm == false
+					
+				elseif MachineName == "PartsWasher" then
+					repeat
+						Player:RequestStreamAroundAsync(v:GetModelCFrame().Position)
+						task.wait(0.3)
+						local water = v:FindFirstChild("Water")
+						local att = water and water:FindFirstChild("Attachment")
+						ParticleE = att and att:FindFirstChild("MAIN SPRAY")	
+					until ParticleE or AutoFarm == false
+					
+				end
+				if ParticleE and ParticleE.Enabled == false then
+					table.insert(Machines, v)
+				end
 			end
 		end
 	end
@@ -560,6 +593,7 @@ function SellCar(Vehicle) -- sells car
 	
 	local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
 	if SellCarGuyHRP and prompt then
+		local VehicleName = Vehicle.Name
 		teleportBrokenCar(Vehicle, SellCarGuyHRP.CFrame * CFrame.new(0, 5, -20))
 		task.wait(0.5)
 		TeleportOnlyPlayer(SellCarGuyHRP.CFrame * CFrame.new(math.random(-5, 5), math.random(0, 5), -5))
@@ -584,18 +618,23 @@ function SellCar(Vehicle) -- sells car
 			fireproximityprompt(prompt)
 			task.wait(0.3)
 			if GetCurrentCar() ~= nil then
+				if GetCurrentCar().Name ~= VehicleName then return false end
 				repeat
 					DebugPrint("repeating until car sold")
 					TeleportOnlyPlayer(SellCarGuyHRP.CFrame * CFrame.new(math.random(-5, 5), math.random(0, 5), -5))
 					task.wait(0.3)
 					fireproximityprompt(prompt)
-				until GetCurrentCar() == nil or AutoFarm == false
+				until GetCurrentCar() == nil and not table.find(GetOwnedCars(), VehicleName) or AutoFarm == false
 				if AutoFarm == false then
 					return false
 				end
 				return true
 			else
-				return true
+				if not table.find(GetOwnedCars(), VehicleName) then
+					return true
+				else
+					return false
+				end
 			end
 		else
 			task.wait(0.1)
@@ -614,7 +653,6 @@ function SellCar(Vehicle) -- sells car
 				return true
 			end
 		end
-		return false
 	else
 		if game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar") then
 			Player:RequestStreamAroundAsync(game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):GetModelCFrame().Position)
@@ -1075,19 +1113,35 @@ end
 Later add here table with current cars that script will be running (their unique names) and check if they were already
 fake driving distance - it true then sell them and don't run it again
 ]]--
+local AlreadyDrivenCars = {}
+local WorkingOnCurrentCar = nil
 
 while true do
 	if AutoFarm == true then
 		local currentCar = GetCurrentCar()
 
 		if not currentCar then
-			DebugPrint("Status: No car - buying new...")
-			local bought = BuyBestCar()
-			if not bought then
-				DebugWarn("Could not buy a car - waiting 5s")
-				task.wait(2)
+			if not WorkingOnCurrentCar then
+				DebugPrint("Status: No car - buying new...")
+				local bought = BuyBestCar()
+				if not bought then
+					DebugWarn("Could not buy a car - waiting 5s")
+					task.wait(2)
+				end
+			else
+				-- Check if car in garage, if not then set WorkingOnCurrentCar to nil, if there is - fire event that will spawn it
+				local OwnedCarsTable = GetOwnedCars()
+				local FindCarIndex = table.find(GetOwnedCars(), WorkingOnCurrentCar)
+				if FindCarIndex then
+					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
+					
+					game:GetService("ReplicatedStorage").Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+				else
+					WorkingOnCurrentCar = nil
+				end
 			end
 		else
+			WorkingOnCurrentCar = currentCar
 			PainCar(currentCar)
 			local condition = GetCarCondition(currentCar)
 			local vParts = GetVehicleParts(currentCar) or {}
@@ -1114,9 +1168,13 @@ while true do
 					DebugPrint("Everything installed")
 				end
 				task.wait(0.2)
-				local AutoDrive = DriveDistance(currentCar, 1.2)
-				if not AutoDrive then
-					DebugWarn("Something went wrong while driving.")
+				if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
+					local AutoDrive = DriveDistance(currentCar, 1.2)
+					if not AutoDrive then
+						DebugWarn("Something went wrong while driving.")
+					else
+						table.insert(AlreadyDrivenCars, currentCar.Name)
+					end
 				end
 
 				if AutoFarm == true then
@@ -1125,6 +1183,8 @@ while true do
 					task.wait(0.2)
 					local sold = SellCar(currentCar)
 					if sold then
+						WorkingOnCurrentCar = nil
+						table.remove(AlreadyDrivenCars, table.find(AlreadyDrivenCars, currentCar.Name))
 						print("--- CAR SOLD ---")
 						task.wait(1)
 						CleanUpUselessParts() -- not working I think
