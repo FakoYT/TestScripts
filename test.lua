@@ -1188,6 +1188,7 @@ while true do
 			local EnginePart = currentCar:WaitForChild("Body"):FindFirstChild("Engine")
 			if EnginePart then
 				WorkingOnCurrentCar = currentCar.Name
+				print(WorkingOnCurrentCar)
 				PaintCar(currentCar)
 				local condition = GetCarCondition(currentCar)
 				local vParts = GetVehicleParts(currentCar) or {}
