@@ -1162,10 +1162,9 @@ local WorkingOnCurrentCar = nil
 while true do
 	if AutoFarm == true then
 		local currentCar = GetCurrentCar()
-		local EnginePart = currentCar:WaitForChild("Body"):FindFirstChild("Engine")
 
 		if not currentCar then
-			if not WorkingOnCurrentCar and EnginePart then
+			if not WorkingOnCurrentCar then
 				DebugPrint("Status: No car - buying new...")
 				local bought = BuyBestCar()
 				if not bought then
@@ -1179,66 +1178,77 @@ while true do
 				local FindCarIndex = table.find(OwnedCarsTable, WorkingOnCurrentCar)
 				if OwnedCarsTable and FindCarIndex then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
-					print("What the helly")
 					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
+					task.wait(0.2)	
 				else
 					WorkingOnCurrentCar = nil
 				end
 			end
 		else
-			WorkingOnCurrentCar = currentCar
-			PaintCar(currentCar)
-			local condition = GetCarCondition(currentCar)
-			local vParts = GetVehicleParts(currentCar) or {}
-			
-			local RequiredParts = {"EngineBlock", "ExhaustManifold", "Transmission", "CylinderHead", "AirIntake"}
-			local MissingCriticalPart = false
+			local EnginePart = currentCar:WaitForChild("Body"):FindFirstChild("Engine")
+			if EnginePart then
+				WorkingOnCurrentCar = currentCar
+				PaintCar(currentCar)
+				local condition = GetCarCondition(currentCar)
+				local vParts = GetVehicleParts(currentCar) or {}
 
-			if vParts and #vParts > 0 then
-				for _, RequiredPart in pairs(RequiredParts) do
-					if not table.find(vParts, RequiredPart) then
-						MissingCriticalPart = true
-						DebugWarn("[Main Loop] - Critical part missing: " .. RequiredPart)
-						break
+				local RequiredParts = {"EngineBlock", "ExhaustManifold", "Transmission", "CylinderHead", "AirIntake"}
+				local MissingCriticalPart = false
+
+				if vParts and #vParts > 0 then
+					for _, RequiredPart in pairs(RequiredParts) do
+						if not table.find(vParts, RequiredPart) then
+							MissingCriticalPart = true
+							DebugWarn("[Main Loop] - Critical part missing: " .. RequiredPart)
+							break
+						end
 					end
 				end
-			end
 
-			if condition < 100 and condition > 0 then 
-				DebugPrint("Status: Car needs repair (Condition: " .. condition .. "%)")
-				local success = FixParts()
-				if not success then
-					DebugWarn("[Main Loop] - Something went wrong while fixing parts, retrying...")
+				if condition < 100 and condition > 0 then 
+					DebugPrint("Status: Car needs repair (Condition: " .. condition .. "%)")
+					local success = FixParts()
+					if not success then
+						DebugWarn("[Main Loop] - Something went wrong while fixing parts, retrying...")
+					end
+				else
+					if condition <= 0 or MissingCriticalPart then
+						InstallAllParts(currentCar)
+						DebugPrint("Trying to install needed parts")
+					end
+					task.wait(0.2)
+					if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
+						local AutoDrive = DriveDistance(currentCar, 1.2)
+						if not AutoDrive then
+							DebugWarn("[Main Loop] - Something went wrong while driving.")
+						else
+							table.insert(AlreadyDrivenCars, currentCar.Name)
+						end
+					end
+
+					if AutoFarm == true then
+						DebugPrint("Status: Selling car...")
+						teleportBrokenCar(currentCar, SafePlaceAfterStop)
+						task.wait(0.2)
+						local sold = SellCar(currentCar)
+						if sold then
+							WorkingOnCurrentCar = nil
+							table.remove(AlreadyDrivenCars, table.find(AlreadyDrivenCars, currentCar.Name))
+							DebugPrint("--- CAR SOLD ---")
+							task.wait(1)
+							CleanUpUselessParts() -- not working I think
+						else
+							DebugWarn("[Main Loop] - Selling error, retrying...")
+						end
+					end
 				end
 			else
-				if condition <= 0 or MissingCriticalPart then
-					InstallAllParts(currentCar)
-					DebugPrint("Trying to install needed parts")
-				end
-				task.wait(0.2)
-				if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
-					local AutoDrive = DriveDistance(currentCar, 1.2)
-					if not AutoDrive then
-						DebugWarn("[Main Loop] - Something went wrong while driving.")
-					else
-						table.insert(AlreadyDrivenCars, currentCar.Name)
-					end
-				end
-
-				if AutoFarm == true then
-					DebugPrint("Status: Selling car...")
-					teleportBrokenCar(currentCar, SafePlaceAfterStop)
+				local OwnedCarsTable = GetOwnedCars()
+				local FindCarIndex = table.find(OwnedCarsTable, WorkingOnCurrentCar)
+				if OwnedCarsTable and FindCarIndex then
+					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
+					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
 					task.wait(0.2)
-					local sold = SellCar(currentCar)
-					if sold then
-						WorkingOnCurrentCar = nil
-						table.remove(AlreadyDrivenCars, table.find(AlreadyDrivenCars, currentCar.Name))
-						DebugPrint("--- CAR SOLD ---")
-						task.wait(1)
-						CleanUpUselessParts() -- not working I think
-					else
-						DebugWarn("[Main Loop] - Selling error, retrying...")
-					end
 				end
 			end
 		end
