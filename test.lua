@@ -1093,24 +1093,21 @@ function BuyBestCar()
 		if not BestCarBody then
 			DebugWarn("[BuyBestCar] - Best car body not found, requesting stream...")
 			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
+			TeleportOnlyPlayer(BestCar:GetModelCFrame().p)
 			return false
 		end
 		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		if not BestCarEngine then
 			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream loop...")
-			repeat
-				Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
-				task.wait(0.3)
-			until BestCarBody:FindFirstChild("Engine") or AutoFarm == false
-			if AutoFarm == false then
-				return false
-			end
-			BestCarEngine = BestCarBody:FindFirstChild("Engine")
+			Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
+			TeleportOnlyPlayer(BestCarBody:GetModelCFrame().p)
+			return false
 		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
 		if not ClickD then
 			DebugWarn("[BuyBestCar] - Best car ClickDetector not found, requesting stream...")
 			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
+			TeleportOnlyPlayer(BestCar:GetModelCFrame().p)
 			return false
 		end
 		
@@ -1118,21 +1115,28 @@ function BuyBestCar()
 			ClickD.MaxActivationDistance = 1000
 			repeat
 				local BestCar = FindBestCar()
-				local BestCarBody = BestCar:FindFirstChild("Body")
+				BestCarBody = BestCar:FindFirstChild("Body")
 				if not BestCarBody then
+					DebugWarn("[BuyBestCar] - Best car body not found, requesting stream...")
 					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
+					TeleportOnlyPlayer(BestCar:GetModelCFrame().p)
 					return false
 				end
 				local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 				if not BestCarEngine then
-					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
+					DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream loop...")
+					Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
+					TeleportOnlyPlayer(BestCarBody:GetModelCFrame().p)
 					return false
 				end
 				local ClickD = BestCar:FindFirstChild("ClickDetector")
 				if not ClickD then
+					DebugWarn("[BuyBestCar] - Best car ClickDetector not found, requesting stream...")
 					Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().p)
+					TeleportOnlyPlayer(BestCar:GetModelCFrame().p)
 					return false
 				end
+
 				
 				if BestCarEngine and ClickD then
 					if GetCurrentCar() == nil then
