@@ -37,20 +37,6 @@ UIStroke.Thickness = 4.2
 UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
 UIStroke.Parent = ActiveBtn
 
-local AutoFarm = false
-
-ActiveBtn.MouseButton1Click:Connect(function()
-	if AutoFarm == false then
-		AutoFarm = true
-		ActiveBtn.Text = "Autofarm: true"
-		UIStroke.Color = Color3.fromRGB(0, 255, 0)
-	else
-		AutoFarm = false
-		ActiveBtn.Text = "Autofarm: false"
-		UIStroke.Color = Color3.fromRGB(255, 0, 0)
-	end
-end)
-
 local Player = game.Players.LocalPlayer
 local SearchedForName = "PitStop Repair2"
 local MapFolder = game.Workspace:FindFirstChild("Map")
@@ -59,15 +45,39 @@ local DebugP = true
 local JunkYardPos1 = CFrame.new(-1642, 5, -116)
 local JunkYardPos2 = CFrame.new(-1799, 5, -354)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local AutoFarm = false
+
+local ConfirmationRemote = ReplicatedStorage:WaitForChild("Events"):WaitForChild("HUD"):WaitForChild("Confirmation")
+
+ActiveBtn.MouseButton1Click:Connect(function()
+	if AutoFarm == false then
+		AutoFarm = true
+		ActiveBtn.Text = "Autofarm: true"
+		UIStroke.Color = Color3.fromRGB(0, 255, 0)
+		
+		ConfirmationRemote.OnClientInvoke = function(message)
+			if AutoFarm == true then
+				return true
+			else
+				ConfirmationRemote.OnClientInvoke = nil
+
+				return false
+			end
+		end
+	else
+		AutoFarm = false
+		ActiveBtn.Text = "Autofarm: false"
+		UIStroke.Color = Color3.fromRGB(255, 0, 0)
+		
+		ConfirmationRemote.OnClientInvoke = nil
+	end
+end)
 
 --Load repair station
 Player:RequestStreamAroundAsync(Vector3.new(-832.043, 9.40005, -1300.34))
 
 -- Load SellCar
 Player:RequestStreamAroundAsync(Vector3.new(-1900.25, 4.57531, -783.911))
-
---AUTO CONFIRMATION
-local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
 
 -- DELETING MAYBE ANTICHEAT LOGS
 local Logs = ReplicatedStorage:WaitForChild("Events"):FindFirstChild("ServerLogs")
@@ -77,15 +87,6 @@ if Logs then
 end
 if Webbhoks then
 	Webbhoks:Destroy()
-end
-
--- AutoConfirm
-local ConfirmationRemote = ReplicatedStorage:WaitForChild("Events"):WaitForChild("HUD"):WaitForChild("Confirmation")
-
-ConfirmationRemote.OnClientInvoke = function(message)
-	if AutoFarm == true then
-		return true
-	end
 end
 
 -- Rename Pitstops
@@ -603,7 +604,7 @@ function SellCar(Vehicle) -- sells car
 		SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	end
 	
-	local prompt = game.Workspace:FindFirstChild("Map"):FindFirstChild("SellCar"):FindFirstChild("Prompt").ProximityPrompt
+	local prompt = SellCargGuy:FindFirstChild("Prompt").ProximityPrompt
 	if SellCarGuyHRP and prompt then
 		local VehicleName = Vehicle.Name
 		teleportBrokenCar(Vehicle, SellCarGuyHRP.CFrame * CFrame.new(0, 5, -20))
