@@ -1129,11 +1129,13 @@ function BuyBestCar()
 				end
 				
 				if BestCarEngine and ClickD then
-					ClickD.MaxActivationDistance = 1000
-					TeleportOnlyPlayer(BestCarEngine.CFrame)
-					task.wait(0.3)
-					fireclickdetector(ClickD)
-					task.wait(1)
+					if GetCurrentCar() == nil then
+						ClickD.MaxActivationDistance = 1000
+						TeleportOnlyPlayer(BestCarEngine.CFrame)
+						task.wait(0.3)
+						fireclickdetector(ClickD)
+						task.wait(1)
+					end
 				else
 					return false
 				end
