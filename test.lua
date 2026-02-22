@@ -1175,10 +1175,10 @@ while true do
 				DebugPrint("Worked on car - " , WorkingOnCurrentCar)
 				-- Check if car in garage, if not then set WorkingOnCurrentCar to nil, if there is - fire event that will spawn it
 				local OwnedCarsTable = GetOwnedCars()
-				local FindCarIndex = table.find(GetOwnedCars(), WorkingOnCurrentCar)
-				if FindCarIndex then
+				local FindCarIndex = table.find(OwnedCarsTable, WorkingOnCurrentCar)
+				if OwnedCarsTable and FindCarIndex then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
-					
+					print("What the helly")
 					ReplicatedStorage.Events.Vehicles.RemoteLoad:InvokeServer(OwnedCarsTable[FindCarIndex], game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
 				else
 					WorkingOnCurrentCar = nil
