@@ -595,7 +595,7 @@ function SellCar(Vehicle) -- sells car
 	if not SellCarGuyHRP then
 		DebugWarn("[SellCar] - SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
 		repeat
-			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().P)
+			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().p)
 			task.wait(0.2)
 		until SellCargGuy:FindFirstChild("HumanoidRootPart") or AutoFarm == false
 		if AutoFarm == false then
