@@ -1097,9 +1097,15 @@ function BuyBestCar()
 		end
 		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		if not BestCarEngine then
-			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream...")
-			Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
-			return false
+			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream loop...")
+			repeat
+				Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().p)
+				task.wait(0.3)
+			until BestCarBody:FindFirstChild("Engine") or AutoFarm == false
+			if AutoFarm == false then
+				return false
+			end
+			BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
 		if not ClickD then
