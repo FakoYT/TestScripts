@@ -679,7 +679,6 @@ function InstallAllParts(CurrentCar) -- Installs every part on the ground to the
 			local success = false
 			for i = 1, 20 do
 				local engineVal = CurrentCar:WaitForChild("Values"):WaitForChild("Engine")
-				DebugPrint(engineVal:FindFirstChild("EngineBlock").Value)
 				if engineVal:FindFirstChild("EngineBlock") and engineVal.EngineBlock.Value ~= "" and engineVal.EngineBlock.Value ~= " "  then
 					success = true
 					break
@@ -1145,27 +1144,30 @@ while true do
 			PainCar(currentCar)
 			local condition = GetCarCondition(currentCar)
 			local vParts = GetVehicleParts(currentCar) or {}
-
-			local FoundNeededPart = false
+			
+			local RequiredParts = {"EngineBlock", "ExhaustManifold", "Transmission", "CylinderHead", "AirIntake"}
+			local MissingCriticalPart = false
 
 			if vParts and #vParts > 0 then
-				for _, partN in pairs(vParts) do
-					if partN == "EngineBlock" or partN == "ExhaustManifold" or partN == "Transmission" or partN == "CylinderHead" or partN == "AirIntake" then
-						FoundNeededPart = true
+				for _, RequiredPart in pairs(RequiredParts) do
+					if not table.find(vParts, RequiredPart) then
+						MissingCriticalPart = true
+						DebugWarn("Critical part missing: " .. RequiredPart)
+						break
 					end
 				end
 			end
 
-			if condition < 100 then 
+			if condition < 100 and condition > 0 then 
 				DebugPrint("Status: Car needs repair (Condition: " .. condition .. "%)")
 				local success = FixParts()
 				if not success then
 					DebugWarn("Something went wrong while fixing parts, retrying...")
 				end
 			else
-				if FoundNeededPart then
+				if condition <= 0 or MissingCriticalPart then
 					InstallAllParts(currentCar)
-					DebugPrint("Everything installed")
+					DebugPrint("Trying to install needed parts")
 				end
 				task.wait(0.2)
 				if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
@@ -1185,7 +1187,7 @@ while true do
 					if sold then
 						WorkingOnCurrentCar = nil
 						table.remove(AlreadyDrivenCars, table.find(AlreadyDrivenCars, currentCar.Name))
-						print("--- CAR SOLD ---")
+						DebugPrint("--- CAR SOLD ---")
 						task.wait(1)
 						CleanUpUselessParts() -- not working I think
 					else
