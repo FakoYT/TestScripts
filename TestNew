@@ -73,6 +73,14 @@ ActiveBtn.MouseButton1Click:Connect(function()
 	end
 end)
 
+-- Anti AFK:
+local VirtualUser = game:GetService("VirtualUser")
+Player.Idled:Connect(function()
+	VirtualUser:CaptureController()
+	VirtualUser:ClickButton2(Vector2.new(0,0))
+	DebugPrint("🛡️ Anti-AFK triggered!")
+end)
+
 --Load repair station
 Player:RequestStreamAroundAsync(Vector3.new(-832.043, 9.40005, -1300.34))
 
