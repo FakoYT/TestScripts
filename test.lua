@@ -595,7 +595,7 @@ function SellCar(Vehicle) -- sells car
 	if not SellCarGuyHRP then
 		DebugWarn("[SellCar] - SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
 		repeat
-			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(SellCargGuy:GetModelCFrame().P)
 			task.wait(0.2)
 		until SellCargGuy:FindFirstChild("HumanoidRootPart") or AutoFarm == false
 		if AutoFarm == false then
@@ -1075,7 +1075,7 @@ function BuyBestCar()
 		local BestCarEngine = BestCarBody:FindFirstChild("Engine")
 		if not BestCarEngine then
 			DebugWarn("[BuyBestCar] - Best car engine model not found, requesting stream...")
-			Player:RequestStreamAroundAsync(BestCar:GetModelCFrame().Position)
+			Player:RequestStreamAroundAsync(BestCarBody:GetModelCFrame().Position)
 			return false
 		end
 		local ClickD = BestCar:FindFirstChild("ClickDetector")
