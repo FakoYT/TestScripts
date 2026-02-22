@@ -447,7 +447,9 @@ function PaintCar(Vehicle) -- Paint car if rusted
 					task.wait(0.2)
 					if string.find(PaintColor.Value, "Rust") then
 						repeat
-							if Character and Humanoid then
+							if Character and Humanoid and Vehicle then
+								DebugPrint("(PaintCar) repeating painting process")
+								TeleportOnlyPlayer(Vehicle:GetPivot())
 								task.wait(0.3)
 								Humanoid.Sit = false
 								task.wait(0.1)
@@ -457,7 +459,7 @@ function PaintCar(Vehicle) -- Paint car if rusted
 							else
 								break
 							end
-						until not string.find(PaintColor.Value, "Rust") or AutoFarm == false
+						until not string.find(PaintColor.Value, "Rust") or GetCurrentCar() ~= Vehicle or AutoFarm == false
 						if AutoFarm == false then
 							return false
 						end
