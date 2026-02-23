@@ -43,9 +43,9 @@ local MapFolder = game.Workspace:FindFirstChild("Map")
 local SecondsToSell = 0
 local CarFarAway = false
 local DebugP = true
-local JunkYardPos1 = Vector3.new(-1827.22705, 5.28211546, -385.016663)
-local JunkYardPos2 = Vector3.new(-1719.62060546875, 8.656662940979004, -169.21669006347656)
-local JunkYardPos3 = Vector3.new(-1593.890625, 9.363893508911133, -66.71568298339844)
+local JunkYardPos1 = CFrame.new(-1827.22705, 5.28211546, -385.016663)
+local JunkYardPos2 = CFrame.new(-1719.62060546875, 8.656662940979004, -169.21669006347656)
+local JunkYardPos3 = CFrame.new(-1593.890625, 9.363893508911133, -66.71568298339844)
 
 local SellGuyCarPos = CFrame.new(-1872.0494384765625, 4.898039817810059, -776.1437377929688)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
