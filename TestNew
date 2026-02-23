@@ -41,9 +41,11 @@ local Player = game.Players.LocalPlayer
 local SearchedForName = "PitStop Repair2"
 local MapFolder = game.Workspace:FindFirstChild("Map")
 local SecondsToSell = 0
+local CarFarAway = false
 local DebugP = true
-local JunkYardPos1 = CFrame.new(-1642, 5, -116)
-local JunkYardPos2 = CFrame.new(-1799, 5, -354)
+local JunkYardPos1 = Vector3.new(-1827.22705, 5.28211546, -385.016663)
+local JunkYardPos2 = Vector3.new(-1719.62060546875, 8.656662940979004, -169.21669006347656)
+local JunkYardPos3 = Vector3.new(-1593.890625, 9.363893508911133, -66.71568298339844)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local AutoFarm = false
 
@@ -131,6 +133,8 @@ Player.PlayerGui:WaitForChild("HUD"):WaitForChild("Notifications").ChildAdded:Co
 			local Seconds = tonumber(SecondCrop)
 			--print("You need to wait ".. tostring(Seconds))
 			SecondsToSell = Seconds + 1
+		elseif string.find(textL.Text, "Car is too far from the sell zone")then
+			CarFarAway = true
 		end
 	end
 end)
@@ -557,11 +561,6 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 end
 
 function FindBestCar() -- returns the most expensive car that can be bought
-	Player:RequestStreamAroundAsync(JunkYardPos1.Position)
-	task.wait()
-	Player:RequestStreamAroundAsync(JunkYardPos2.Position)
-	task.wait(0.1)
-	
 	local Vehicles = game.Workspace:WaitForChild("Vehicles", 5)
 	if not Vehicles then 
 		DebugWarn("[FindBestCar] - Vehicles folder not found1")
@@ -677,6 +676,11 @@ function SellCar(Vehicle) -- sells car
 				if GetCurrentCar().Name ~= VehicleName then return false end
 				repeat
 					DebugPrint("repeating until car sold")
+					if CarFarAway == true then
+						DebugPrint("[SellCar] - Car is far away, teleporting")
+						teleportBrokenCar(Vehicle, SellCarGuyHRP.CFrame * CFrame.new(0, 5, -20))
+						task.wait(0.2)
+					end
 					TeleportOnlyPlayer(SellCarGuyHRP.CFrame * CFrame.new(math.random(-5, 5), math.random(0, 5), -5))
 					task.wait(0.3)
 					fireproximityprompt(prompt)
@@ -684,9 +688,11 @@ function SellCar(Vehicle) -- sells car
 				if AutoFarm == false then
 					return false
 				end
+				CarFarAway = false
 				return true
 			else
 				if not table.find(GetOwnedCars(), VehicleName) then
+					CarFarAway = false
 					return true
 				else
 					return false
@@ -704,8 +710,10 @@ function SellCar(Vehicle) -- sells car
 				if AutoFarm == false then
 					return false
 				end
+				CarFarAway = false
 				return true
 			else
+				CarFarAway = false
 				return true
 			end
 		end
@@ -1215,6 +1223,8 @@ function GetCarCondition(Vehicle)
 	return condition
 end
 
+local TeleportJunkyardPos = 0
+
 function BuyBestCar()
 	local BestCar = FindBestCar()
 	if BestCar then
@@ -1293,6 +1303,16 @@ function BuyBestCar()
 			return false
 		end
 	else
+		if TeleportJunkyardPos == 0 then
+			TeleportOnlyPlayer(JunkYardPos1)
+			TeleportJunkyardPos = 1
+		elseif TeleportJunkyardPos == 1 then
+			TeleportOnlyPlayer(JunkYardPos2)
+			TeleportJunkyardPos = 2
+		else
+			TeleportOnlyPlayer(JunkYardPos3)
+			TeleportJunkyardPos = 0
+		end
 		return false
 	end
 end
@@ -1393,6 +1413,7 @@ while true do
 						teleportBrokenCar(currentCar, SafePlaceAfterStop)
 						task.wait(0.2)
 						local sold = SellCar(currentCar)
+						
 						if sold then
 							WorkingOnCurrentCar = nil
 							if table.find(AlreadyDrivenCars, currentCar.Name) then
@@ -1407,24 +1428,9 @@ while true do
 					end
 				end
 			else
-				local OwnedCarsTable = GetOwnedCars()
-				local FoundCar = nil
-				for _, ownedCar in pairs(OwnedCarsTable) do
-					if ownedCar.Name == WorkingOnCurrentCar then
-						FoundCar = ownedCar
-					end
-				end
-
-				if OwnedCarsTable and FoundCar then
-					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
-					local RemoteLpath = ReplicatedStorage:WaitForChild("Events", 5):WaitForChild("Vehicles", 5):WaitForChild("RemoteLoad", 5)
-					if RemoteLpath then
-						RemoteLpath:InvokeServer(FoundCar, game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)
-					end
-					task.wait(0.2)	
-				else
-					print("Setting to nil")
-					WorkingOnCurrentCar = nil
+				local VehicleModelCFrame = currentCar:GetModelCFrame()
+				if VehicleModelCFrame then
+					TeleportOnlyPlayer()
 				end
 			end
 		end
