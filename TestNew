@@ -1230,6 +1230,7 @@ function BuyBestCar()
 		
 		if BestCarEngine and ClickD then
 			ClickD.MaxActivationDistance = 1000
+			local RepeatTimes = 0
 			repeat
 				local BestCar = FindBestCar()
 				BestCarBody = BestCar:FindFirstChild("Body")
@@ -1262,13 +1263,16 @@ function BuyBestCar()
 						task.wait(0.3)
 						fireclickdetector(ClickD)
 						task.wait(1)
+						RepeatTimes += 1
+					else
+						return false
 					end
 				else
 					return false
 				end
 
-			until GetCurrentCar() ~= nil or AutoFarm == false
-			if AutoFarm == false then
+			until GetCurrentCar() ~= nil or AutoFarm == false or RepeatTimes >= 5
+			if AutoFarm == false or RepeatTimes >= 5 then
 				return false
 			end
 			return true
