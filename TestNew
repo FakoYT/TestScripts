@@ -484,17 +484,29 @@ function PaintCar(Vehicle) -- Paint car if rusted
 end
 
 
-function WaitUntilRepaired(part) -- Waits until part is repaired
-	if part:GetAttribute("Wear") == 0 then
-		return
+function WaitUntilRepaired(part)
+	if not part or not part.Parent then return false end
+	if part:GetAttribute("Wear") == 0 then return true end
+
+	local timeout = 0
+	local maxWait = 120
+
+	while part and part.Parent and part:GetAttribute("Wear") > 0 and AutoFarm == true do
+		task.wait(0.5)
+		timeout = timeout + 0.5
+
+		if timeout >= maxWait then
+			DebugWarn("Timeout: Part " .. part.Name .. " was not fixed after long period of time!.")
+			break 
+		end
 	end
 
-	repeat
-		part:GetAttributeChangedSignal("Wear"):Wait()
-	until part:GetAttribute("Wear") == 0 or AutoFarm == false
-	if AutoFarm == false then
-		return false
+	-- Zwracamy true tylko, jeśli faktycznie się naprawiło
+	if part and part.Parent and part:GetAttribute("Wear") == 0 then
+		return true
 	end
+
+	return false
 end
 
 function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
