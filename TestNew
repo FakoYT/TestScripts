@@ -1436,7 +1436,8 @@ while true do
 			else
 				local VehicleModelCFrame = currentCar:GetModelCFrame()
 				if VehicleModelCFrame then
-					TeleportOnlyPlayer()
+					DebugPrint("[Main Loop] - No Engine part in car, teleporting to it")
+					TeleportOnlyPlayer(VehicleModelCFrame)
 				end
 			end
 		end
