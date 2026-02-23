@@ -218,8 +218,13 @@ function DriveDistance(Vehicle, additionalKm)
 	while tonumber(mileageVal.Value) < targetKm do
 		if seat then
 			if not seat.Occupant then
-				TeleportOnlyPlayer(seat.CFrame)
+				seat:Sit(Player.Character.Humanoid)
+				task.wait(0.1)
 			end
+			
+			local rootPos = carRoot.Position
+			local look = seat.CFrame.LookVector
+			seat.CFrame = CFrame.lookAt(rootPos, rootPos + Vector3.new(look.X, 0, look.Z))
 
 			local speed = math.random(150, 220)
 			local wobble = math.sin(tick() * 4) * 15
