@@ -218,10 +218,10 @@ function DriveDistance(Vehicle, additionalKm)
 	local CollisionData = {}
 
 	for _, part in pairs(Vehicle:GetDescendants()) do
-		if part:IsA("BasePart") then
+		if part:IsA("Part") then
 			CollisionData[part] = part.CanCollide
 
-			if part.Name:lower():find("wheel") or part.Name:lower():find("tire") or part:IsA("MeshPart") then
+			if part.Name:lower():find("FL") or part.Name:lower():find("FR") or part.Name:lower():find("RL") or part.Name:lower():find("RR") then
 				part.CanCollide = false
 			end
 		end
