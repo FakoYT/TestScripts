@@ -208,74 +208,70 @@ function DriveDistance(Vehicle, additionalKm)
 	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
 
 	FakePlate.Position = FakePlatePosition
+	
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
 
+	-- 1. WYŁĄCZAMY SKRYPTY AUTA (A-Chassis Stop)
 	for _, s in pairs(Vehicle:GetDescendants()) do
 		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
 			s.Disabled = true
 		end
 	end
 
+	-- 2. KONFIGURACJA SILNIKÓW I SKRĘTU
 	local motors = {}
+	local steeringHinges = {}
 
 	for _, child in pairs(wheels:GetDescendants()) do
 		if child:IsA("HingeConstraint") then
-			if child.Name == "#AV" then
+			if child.Name == "#AV" or child.Name == "#BV" then
 				table.insert(motors, child)
 				child.ActuatorType = Enum.ActuatorType.Motor
-			elseif child.Name == "#BV" then
-				-- Hamulec całkowicie wyłączony
-				child.ActuatorType = Enum.ActuatorType.Motor
-				child.MotorMaxTorque = 0
-				child.AngularVelocity = 0
+			elseif child.Name == "#SV" then -- #SV to zazwyczaj Steer Version (Servo)
+				table.insert(steeringHinges, child)
+				child.ActuatorType = Enum.ActuatorType.Servo
 			end
 		end
 	end
 
-	-- Wyłącz ręczny hamulec
-	local Values = Vehicle:FindFirstChild("Values")
-	if Values and Values:FindFirstChild("PBrake") then
-		Values.PBrake.Value = false
-	end
-
 	local mileageVal = Player.PlayerData.Status.KMs
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
-
+	
 	local steerTimer = tick()
 	local currentYaw = 0
 	local targetYaw = 0
-
+	
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
+		-- 3. USTAWIANIE PRĘDKOŚCI (Brute Force)
+		-- 300-500 w AngularVelocity powinno dać dużą prędkość
+		for _, motor in pairs(motors) do
+			motor.MotorMaxTorque = 1e7
+			motor.MotorMaxAcceleration = 1e5
+			motor.AngularVelocity = 350 
+		end
 
-		-- Losowa zmiana skrętu co 1-3 sekundy
+		-- 4. SKRĘCANIE (Emulacja zygzaka przez Servo)
 		if now - steerTimer > math.random(10, 30) / 10 then
 			steerTimer = now
 			targetYaw = math.random(-15, 15) / 10  -- -1.5 do 1.5 rad/s obrotu
 		end
 		currentYaw = currentYaw + (targetYaw - currentYaw) * 0.05
 
-		for _, motor in pairs(motors) do
-			motor.MotorMaxTorque = 1e7
-			motor.MotorMaxAcceleration = 1e5
-			motor.AngularVelocity = 350
-		end
-
-		-- Stabilizacja pozioma + skręt przez AngularVelocity
+		-- 5. STABILIZACJA (CFrame)
 		local rootPos = seat.Position
 		local look = seat.CFrame.LookVector
 		seat.CFrame = CFrame.lookAt(
 			Vector3.new(rootPos.X, rootPos.Y, rootPos.Z),
 			Vector3.new(rootPos.X + look.X, rootPos.Y, rootPos.Z + look.Z)
 		)
-
-		-- Skręt: obracamy auto w osi Y płynnie
+		
 		seat.AssemblyAngularVelocity = Vector3.new(0, currentYaw, 0)
 
+		-- Przesuwamy płytę pod auto
 		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
 
 		task.wait()
-
 		if AutoFarm == false then
 			for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 			for _, s in pairs(Vehicle:GetDescendants()) do
@@ -288,6 +284,7 @@ function DriveDistance(Vehicle, additionalKm)
 		end
 	end
 
+	-- 6. PRZYWRACANIE (Opcjonalne, jeśli chcesz potem jeździć normalnie)
 	for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 	for _, s in pairs(Vehicle:GetDescendants()) do
 		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
