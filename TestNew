@@ -211,13 +211,6 @@ function DriveDistance(Vehicle, additionalKm)
 	
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
 
-	-- 1. WYŁĄCZAMY SKRYPTY AUTA (A-Chassis Stop)
-	for _, s in pairs(Vehicle:GetDescendants()) do
-		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
-			s.Disabled = true
-		end
-	end
-
 	-- 2. KONFIGURACJA SILNIKÓW I SKRĘTU
 	local motors = {}
 	local steeringHinges = {}
@@ -238,8 +231,13 @@ function DriveDistance(Vehicle, additionalKm)
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
 	
 	local steerTimer = tick()
-	local currentYaw = 0
-	local targetYaw = 0
+	
+	local gyro = Instance.new("BodyGyro")
+	gyro.MaxTorque = Vector3.new(0, 1e6, 0)  -- tylko oś Y
+	gyro.P = 1e6
+	gyro.D = 500
+	gyro.CFrame = seat.CFrame  -- zapamiętaj aktualny kierunek
+	gyro.Parent = seat
 	
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
@@ -250,23 +248,15 @@ function DriveDistance(Vehicle, additionalKm)
 			motor.MotorMaxAcceleration = 1e5
 			motor.AngularVelocity = 350 
 		end
-
-		-- 4. SKRĘCANIE (Emulacja zygzaka przez Servo)
+		
 		if now - steerTimer > math.random(10, 30) / 10 then
 			steerTimer = now
-			targetYaw = math.random(-15, 15) / 10  -- -1.5 do 1.5 rad/s obrotu
+			-- obróć gyro o losowy kąt = auto zmieni kierunek płynnie
+			gyro.CFrame = gyro.CFrame * CFrame.Angles(0, math.rad(math.random(-20, 20)), 0)
 		end
-		currentYaw = currentYaw + (targetYaw - currentYaw) * 0.05
-
+		
 		-- 5. STABILIZACJA (CFrame)
 		local rootPos = seat.Position
-		local look = seat.CFrame.LookVector
-		seat.CFrame = CFrame.lookAt(
-			Vector3.new(rootPos.X, rootPos.Y, rootPos.Z),
-			Vector3.new(rootPos.X + look.X, rootPos.Y, rootPos.Z + look.Z)
-		)
-		
-		--seat.AssemblyAngularVelocity = Vector3.new(0, currentYaw, 0)
 
 		-- Przesuwamy płytę pod auto
 		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
@@ -279,6 +269,7 @@ function DriveDistance(Vehicle, additionalKm)
 					s.Disabled = false
 				end
 			end
+			gyro:Destroy()
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
@@ -291,7 +282,7 @@ function DriveDistance(Vehicle, additionalKm)
 			s.Disabled = false
 		end
 	end
-
+	gyro:Destroy()
 	return true
 end
 
