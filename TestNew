@@ -266,7 +266,7 @@ function DriveDistance(Vehicle, additionalKm)
 			Vector3.new(rootPos.X + look.X, rootPos.Y, rootPos.Z + look.Z)
 		)
 		
-		seat.AssemblyAngularVelocity = Vector3.new(0, currentYaw, 0)
+		--seat.AssemblyAngularVelocity = Vector3.new(0, currentYaw, 0)
 
 		-- Przesuwamy płytę pod auto
 		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
