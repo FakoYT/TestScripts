@@ -230,14 +230,9 @@ function DriveDistance(Vehicle, additionalKm)
 	local mileageVal = Player.PlayerData.Status.KMs
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
 	
-	local steerTimer = tick()
+	local pbrakeTimer = tick()
 	
-	local gyro = Instance.new("BodyGyro")
-	gyro.MaxTorque = Vector3.new(0, 1e6, 0)  -- tylko oś Y
-	gyro.P = 1e6
-	gyro.D = 500
-	gyro.CFrame = seat.CFrame  -- zapamiętaj aktualny kierunek
-	gyro.Parent = seat
+	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
 	
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
@@ -249,14 +244,10 @@ function DriveDistance(Vehicle, additionalKm)
 			motor.AngularVelocity = 350 
 		end
 		
-		local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
-
-		pbind:Fire(Vector3.new(0, 0, 1))
 		
-		if now - steerTimer > math.random(10, 30) / 10 then
-			steerTimer = now
-			-- obróć gyro o losowy kąt = auto zmieni kierunek płynnie
-			gyro.CFrame = gyro.CFrame * CFrame.Angles(0, math.rad(math.random(-20, 20)), 0)
+		if now - pbrakeTimer > 2 then
+			pbrakeTimer = now
+			pbind:Fire(Vector3.new(0, 0, 1))
 		end
 		
 		-- 5. STABILIZACJA (CFrame)
@@ -273,7 +264,6 @@ function DriveDistance(Vehicle, additionalKm)
 					s.Disabled = false
 				end
 			end
-			gyro:Destroy()
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
@@ -286,7 +276,6 @@ function DriveDistance(Vehicle, additionalKm)
 			s.Disabled = false
 		end
 	end
-	gyro:Destroy()
 	return true
 end
 
