@@ -207,52 +207,160 @@ function DriveDistance(Vehicle, additionalKm)
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
 	local seat = Vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
 	local carRoot = GetCarRoot(Vehicle)
+
 	FakePlate.Position = FakePlatePosition
 	task.wait(0.1)
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
-
 	task.wait(0.5)
 
+	-- Pobierz Tune żeby wyliczyć poprawne wartości
+	local Tune = require(Vehicle:FindFirstChild("A-Chassis Tune", true))
+	local FinalDrive = Tune.FinalDrive * (Tune.FDMult or 1)
+	local pi = math.pi
+
+	-- Max angular velocity kół (przy redline, 1. bieg)
+	local gear1Ratio = Tune.Ratios[3] -- [1]=reverse, [2]=neutral, [3]=1st
+	local maxAV = (Tune.Redline + 100) / (FinalDrive * 30 / pi * gear1Ratio)
+
+	-- Zbierz koła napędowe
+	local driveWheels = {}
+	local allWheels = {}
+	for _, wheel in ipairs(Vehicle.Wheels:GetChildren()) do
+		table.insert(allWheels, wheel)
+		local isRWD = Tune.Config == "RWD" and (wheel.Name == "RL" or wheel.Name == "RR" or wheel.Name == "R")
+		local isFWD = Tune.Config == "FWD" and (wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F")
+		local isAWD = Tune.Config == "AWD"
+		if isRWD or isFWD or isAWD then
+			table.insert(driveWheels, wheel)
+		end
+	end
+
+	-- Upewnij się że gracz siedzi
+	if seat and not seat.Occupant then
+		seat:Sit(Player.Character.Humanoid)
+		task.wait(0.3)
+	end
+
+	-- Wyłącz skręt kół (zostaw ACS żeby to obsługiwał przez Values jeśli chcesz)
+	local Values = Vehicle:FindFirstChild("Values")
+
 	local lastUpdate = tick()
+	local steerTimer = tick()
+	local currentSteer = 0
+	local targetSteer = 0
+
+	-- Ustaw bieg na 1 żeby ACS nie interferował z AngularVelocity znakiem
+	if Values then
+		-- Włącz auto jeśli nie jest włączone
+		local isOn = Vehicle.Parent and Vehicle:FindFirstChild("IsOn")
+		-- (opcjonalne, ACS już to robi)
+	end
 
 	while tonumber(mileageVal.Value) < targetKm do
-		if seat then
-			if not seat.Occupant then
-				seat:Sit(Player.Character.Humanoid)
-				task.wait(0.1)
-			end
-			
-			local rootPos = carRoot.Position
-			local look = seat.CFrame.LookVector
-			seat.CFrame = CFrame.lookAt(rootPos, rootPos + Vector3.new(look.X, 0, look.Z))
-
-			local speed = math.random(150, 220)
-			local wobble = math.sin(tick() * 4) * 15
-
-			seat.Throttle = 1
-			seat.Steer = math.sin(tick() * 6) 
-
-			seat.AssemblyLinearVelocity = (seat.CFrame.LookVector * speed) + (seat.CFrame.RightVector * wobble) + Vector3.new(0, -10, 0)
-
-			seat.AssemblyAngularVelocity = Vector3.new(0, math.random(-2, 2), 0)
-		else
-			return false
+		if not seat or not seat.Occupant then
+			if seat then seat:Sit(Player.Character.Humanoid) end
+			task.wait(0.1)
+			continue
 		end
 
+		local now = tick()
+		local dt = task.wait() -- delta time
+
+		-- Płynna losowa zmiana skrętu co ~1-3 sekundy
+		if now - steerTimer > math.random(10, 30) / 10 then
+			steerTimer = now
+			targetSteer = (math.random(-35, 35)) / 100 -- -0.35 do 0.35, delikatnie
+		end
+
+		-- Interpolacja skrętu żeby nie było gwałtownych zmian (antypoślizg)
+		currentSteer = currentSteer + (targetSteer - currentSteer) * 0.08
+
+		-- Przelicz prędkość kątową kół odpowiadającą ~180 km/h bez poślizgu
+		-- Prędkość liniowa koła = AngularVelocity * promień_koła
+		-- Chcemy ~50 m/s (180km/h), promień koła ≈ Size.Y/2
+		local targetSpeed = 50 -- m/s (~180 km/h)
+		local wheelRadius = (driveWheels[1] and driveWheels[1].Size.Y / 2) or 1.35
+		local targetAV = math.min(targetSpeed / wheelRadius, maxAV) -- nie przekraczaj redline
+
+		-- Ustaw motory na wszystkich kołach
+		for _, wheel in ipairs(allWheels) do
+			local av = wheel:FindFirstChild("#AV")
+			local bv = wheel:FindFirstChild("#BV")
+
+			local isDrive = false
+			for _, dw in ipairs(driveWheels) do
+				if dw == wheel then isDrive = true break end
+			end
+
+			if av then
+				if isDrive then
+					-- Napędowe: ustaw prędkość i torque
+					av.AngularVelocity = targetAV -- zawsze do przodu
+					av.MotorMaxTorque = 8000      -- wystarczający żeby utrzymać prędkość
+				else
+					-- Nienapędowe: brak siły napędowej
+					av.AngularVelocity = targetAV -- synchronizuj z prędkością żeby nie było slip
+					av.MotorMaxTorque = 0
+				end
+			end
+
+			if bv then
+				bv.MotorMaxTorque = 0 -- brak hamowania
+			end
+		end
+
+		-- Skręt przez CFrame kół (tak jak robi Steering() w ACS)
+		for _, wheel in ipairs(Vehicle.Wheels:GetChildren()) do
+			if wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F" then
+				local steerPart = wheel:FindFirstChild("Arm") and wheel.Arm:FindFirstChild("Steer")
+				local basePart  = wheel:FindFirstChild("Base")
+				if steerPart and basePart then
+					local maxAngle = Tune.LockToLock * 180 / Tune.SteerRatio
+					local angle = currentSteer * maxAngle
+					steerPart.CFrame = basePart.CFrame * CFrame.Angles(0, -math.rad(angle), 0)
+				end
+			end
+		end
+
+		-- Utrzymuj prędkość przez AssemblyLinearVelocity (bez poślizgu – koła i karoseria zsynchronizowane)
+		local lookVec = seat.CFrame.LookVector
+		local flatLook = Vector3.new(lookVec.X, 0, lookVec.Z).Unit
+		local rightVec = seat.CFrame.RightVector
+		local flatRight = Vector3.new(rightVec.X, 0, rightVec.Z).Unit
+
+		-- Lekki drift boczny proporcjonalny do skrętu (realistyczny, nie poślizg)
+		local lateralSpeed = currentSteer * 3 -- max ~3 m/s bocznego ruchu
+		seat.AssemblyLinearVelocity = (flatLook * targetSpeed) + (flatRight * lateralSpeed) + Vector3.new(0, -5, 0)
+
+		-- Utrzymuj pozycję FakePlate
 		FakePlate.CFrame = CFrame.new(carRoot.Position.X, FakePlatePosition.Y, carRoot.Position.Z)
 
-		if tick() - lastUpdate > 1 then
-			lastUpdate = tick()
+		if now - lastUpdate > 1 then
+			lastUpdate = now
 		end
+
 		if AutoFarm == false then
+			-- Zatrzymaj koła
+			for _, wheel in ipairs(allWheels) do
+				local av = wheel:FindFirstChild("#AV")
+				local bv = wheel:FindFirstChild("#BV")
+				if av then av.MotorMaxTorque = 0 end
+				if bv then bv.MotorMaxTorque = 5000 end
+			end
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
-
-		task.wait() 
 	end
 
-	if seat then seat.AssemblyLinearVelocity = Vector3.new(0,0,0) end
+	-- Zatrzymaj
+	for _, wheel in ipairs(allWheels) do
+		local av = wheel:FindFirstChild("#AV")
+		local bv = wheel:FindFirstChild("#BV")
+		if av then av.MotorMaxTorque = 0 end
+		if bv then bv.MotorMaxTorque = 5000 end
+	end
+
+	if seat then seat.AssemblyLinearVelocity = Vector3.new(0, 0, 0) end
 	return true
 end
 
