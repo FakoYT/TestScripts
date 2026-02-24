@@ -232,7 +232,7 @@ function DriveDistance(Vehicle, additionalKm)
 			seat.Throttle = 1
 			seat.Steer = math.sin(tick() * 6) 
 
-			seat.AssemblyLinearVelocity = (seat.CFrame.LookVector * speed) + (seat.CFrame.RightVector * wobble) + Vector3.new(0, -15, 0)
+			seat.AssemblyLinearVelocity = (seat.CFrame.LookVector * speed) + (seat.CFrame.RightVector * wobble) + Vector3.new(0, -10, 0)
 
 			seat.AssemblyAngularVelocity = Vector3.new(0, math.random(-2, 2), 0)
 		else
