@@ -215,51 +215,50 @@ function DriveDistance(Vehicle, additionalKm)
 
 	local lastUpdate = tick()
 	
-	local CollisionData = {}
-
-	for _, part in pairs(Vehicle:GetDescendants()) do
-		if part:IsA("Part") then
-			CollisionData[part] = part.CanCollide
-
-			if part.Name:lower():find("FL") or part.Name:lower():find("FR") or part.Name:lower():find("RL") or part.Name:lower():find("RR") then
-				part.CanCollide = false
-			end
+	local wheels = Vehicle:FindFirstChild("Wheels", true)
+	
+	local motors = {}
+	for _, child in pairs(wheels:GetDescendants()) do
+		if child:IsA("HingeConstraint") and (child.Name == "#AV" or child.Name == "#BV") then
+			table.insert(motors, child)
+			child.ActuatorType = Enum.ActuatorType.Motor -- Wymuszamy tryb silnika
 		end
 	end
 
 	while tonumber(mileageVal.Value) < targetKm do
-		if seat then
-			if not seat.Occupant then
-				seat:Sit(Player.Character.Humanoid)
-				task.wait(0.1)
+		if AutoFarm == false then break end
+
+		-- 1. EMULACJA NACISKU GAZU
+		local targetSpeed = 150 -- Prędkość obrotowa
+		local torque = 50000 -- Siła silnika
+
+		for _, motor in pairs(motors) do
+			if motor.Parent then
+				motor.MotorMaxTorque = torque
+				motor.AngularVelocity = targetSpeed
 			end
-			
-			local rootPos = carRoot.Position
-			local look = seat.CFrame.LookVector
-			seat.CFrame = CFrame.lookAt(rootPos, rootPos + Vector3.new(look.X, 0, look.Z))
-
-			local speed = math.random(150, 220)
-			local wobble = math.sin(tick() * 4) * 15
-
-			seat.Throttle = 1
-			seat.Steer = math.sin(tick() * 6) 
-
-			seat.AssemblyLinearVelocity = (seat.CFrame.LookVector * speed) + (seat.CFrame.RightVector * wobble) + Vector3.new(0, -10, 0)
-
-			seat.AssemblyAngularVelocity = Vector3.new(0, math.random(-2, 2), 0)
-		else
-			return false
 		end
 
+		-- 2. LOSOWE SKRĘCANIE (A-Chassis reaguje na seat.Steer)
+		seat.Throttle = 1
+		seat.Steer = math.sin(tick() * 2) * 0.5 -- Delikatne "zygzaki"
+
+		-- 3. STABILIZACJA (Bardzo ważne!)
+		-- Mimo użycia silników, musimy trzymać auto na płycie, żeby nie odleciało
+		local carRoot = seat -- lub GetCarRoot(Vehicle)
+		local look = seat.CFrame.LookVector
+
+		-- Wymuszamy poziom, żeby auto nie stawało "dęba" od momentu obrotowego
+		local currentPos = carRoot.Position
+		seat.CFrame = CFrame.lookAt(
+			Vector3.new(currentPos.X, FakePlatePosition.Y + 3.2, currentPos.Z),
+			Vector3.new(currentPos.X + look.X, FakePlatePosition.Y + 3.2, currentPos.Z + look.Z)
+		)
+
+		-- Nadążanie płyty
 		FakePlate.CFrame = CFrame.new(carRoot.Position.X, FakePlatePosition.Y, carRoot.Position.Z)
 
-		if tick() - lastUpdate > 1 then
-			lastUpdate = tick()
-		end
 		if AutoFarm == false then
-			for part, originalState in pairs(CollisionData) do
-				if part and part.Parent then part.CanCollide = originalState end
-			end
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
@@ -267,9 +266,10 @@ function DriveDistance(Vehicle, additionalKm)
 		task.wait() 
 	end
 	
-	for part, originalState in pairs(CollisionData) do
-		if part and part.Parent then
-			part.CanCollide = originalState
+	for _, motor in pairs(motors) do
+		if motor.Parent then
+			motor.AngularVelocity = 0
+			motor.MotorMaxTorque = 10000 -- Hamulec
 		end
 	end
 	
