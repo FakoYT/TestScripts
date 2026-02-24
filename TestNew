@@ -205,6 +205,9 @@ function DriveDistance(Vehicle, additionalKm)
 	local seat = Vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
 	local wheels = Vehicle:FindFirstChild("Wheels", true)
 	if not wheels or not seat then return false end
+	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
+
+	FakePlate.Position = FakePlatePosition
 
 	-- 1. WYŁĄCZAMY SKRYPTY AUTA (A-Chassis Stop)
 	for _, s in pairs(Vehicle:GetDescendants()) do
