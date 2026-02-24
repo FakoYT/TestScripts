@@ -257,8 +257,8 @@ function DriveDistance(Vehicle, additionalKm)
 		local rootPos = seat.Position
 		local look = seat.CFrame.LookVector
 		seat.CFrame = CFrame.lookAt(
-			Vector3.new(rootPos.X, FakePlatePosition.Y + 2.2, rootPos.Z),
-			Vector3.new(rootPos.X + look.X, FakePlatePosition.Y + 2.2, rootPos.Z + look.Z)
+			Vector3.new(rootPos.X, FakePlatePosition.Y + 3, rootPos.Z),
+			Vector3.new(rootPos.X + look.X, FakePlatePosition.Y + 3, rootPos.Z + look.Z)
 		)
 
 		-- Przesuwamy płytę pod auto
