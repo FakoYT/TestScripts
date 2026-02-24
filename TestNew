@@ -208,6 +208,8 @@ function DriveDistance(Vehicle, additionalKm)
 	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
 
 	FakePlate.Position = FakePlatePosition
+	
+	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
 
 	-- 1. WYŁĄCZAMY SKRYPTY AUTA (A-Chassis Stop)
 	for _, s in pairs(Vehicle:GetDescendants()) do
