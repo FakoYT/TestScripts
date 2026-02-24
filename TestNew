@@ -249,6 +249,10 @@ function DriveDistance(Vehicle, additionalKm)
 			motor.AngularVelocity = 350 
 		end
 		
+		local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
+
+		pbind:Fire(Vector3.new(0, 0, 1))
+		
 		if now - steerTimer > math.random(10, 30) / 10 then
 			steerTimer = now
 			-- obróć gyro o losowy kąt = auto zmieni kierunek płynnie
