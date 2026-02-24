@@ -278,7 +278,8 @@ function DriveDistance(Vehicle, additionalKm)
 		-- Przelicz prędkość kątową kół odpowiadającą ~180 km/h bez poślizgu
 		-- Prędkość liniowa koła = AngularVelocity * promień_koła
 		-- Chcemy ~50 m/s (180km/h), promień koła ≈ Size.Y/2
-		local targetSpeed = 200 -- m/s (~180 km/h)
+		local targetSpeedKmh = math.random(150, 220) -- km/h
+		local targetSpeed = targetSpeedKmh / 3.6
 		local wheelRadius = (driveWheels[1] and driveWheels[1].Size.Y / 2) or 1.35
 		local targetAV = math.min(targetSpeed / wheelRadius, maxAV) -- nie przekraczaj redline
 
