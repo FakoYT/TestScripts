@@ -203,140 +203,81 @@ end
 
 function DriveDistance(Vehicle, additionalKm)
 	local seat = Vehicle:FindFirstChildWhichIsA("VehicleSeat", true)
-	local wheelsFolder = Vehicle:FindFirstChild("Wheels", true)
-	if not wheelsFolder or not seat then return false end
-
+	local wheels = Vehicle:FindFirstChild("Wheels", true)
+	if not wheels or not seat then return false end
 	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
+
 	FakePlate.Position = FakePlatePosition
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
-	task.wait(0.5)
 
-	-- Wyłącz skrypty ACS
 	for _, s in pairs(Vehicle:GetDescendants()) do
 		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
 			s.Disabled = true
 		end
 	end
-	task.wait(0.1)
 
-	-- Pobierz Tune
-	local Tune = require(Vehicle:FindFirstChild("A-Chassis Tune", true))
-	local wheelRadius = 1.35
-	for _, w in pairs(wheelsFolder:GetChildren()) do
-		if w:IsA("BasePart") then
-			wheelRadius = w.Size.Y / 2
-			break
+	local motors = {}
+
+	for _, child in pairs(wheels:GetDescendants()) do
+		if child:IsA("HingeConstraint") then
+			if child.Name == "#AV" then
+				table.insert(motors, child)
+				child.ActuatorType = Enum.ActuatorType.Motor
+			elseif child.Name == "#BV" then
+				-- Hamulec całkowicie wyłączony
+				child.ActuatorType = Enum.ActuatorType.Motor
+				child.MotorMaxTorque = 0
+				child.AngularVelocity = 0
+			end
 		end
 	end
 
-	-- Przelicz AV dla docelowej prędkości
-	local targetSpeedKmh = math.random(180, 220)
-	local targetSpeedMs  = targetSpeedKmh / 3.6
-	local targetAV       = targetSpeedMs / wheelRadius  -- rad/s bez poślizgu
-
-	-- Posadź gracza
-	if not seat.Occupant then
-		seat:Sit(Player.Character.Humanoid)
-		task.wait(0.3)
-	end
-
-	-- Wyłącz ręczny hamulec przez Values
+	-- Wyłącz ręczny hamulec
 	local Values = Vehicle:FindFirstChild("Values")
 	if Values and Values:FindFirstChild("PBrake") then
 		Values.PBrake.Value = false
 	end
 
 	local mileageVal = Player.PlayerData.Status.KMs
-	local targetKm   = tonumber(mileageVal.Value) + additionalKm
+	local targetKm = tonumber(mileageVal.Value) + additionalKm
 
-	local steerTimer   = tick()
-	local currentSteer = 0
-	local targetSteer  = 0
+	local steerTimer = tick()
+	local currentYaw = 0
+	local targetYaw = 0
 
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
 
-		-- Losowa zmiana kierunku co 1-3s
+		-- Losowa zmiana skrętu co 1-3 sekundy
 		if now - steerTimer > math.random(10, 30) / 10 then
-			steerTimer  = now
-			targetSteer = math.random(-25, 25) / 100  -- -0.25 do 0.25
+			steerTimer = now
+			targetYaw = math.random(-15, 15) / 10  -- -1.5 do 1.5 rad/s obrotu
 		end
-		-- Płynna interpolacja skrętu
-		currentSteer = currentSteer + (targetSteer - currentSteer) * 0.06
+		currentYaw = currentYaw + (targetYaw - currentYaw) * 0.05
 
-		-- Skręt przez CFrame na Arm.Steer (tak jak robi ACS)
-		local maxAngle = Tune.LockToLock * 180 / Tune.SteerRatio
-		for _, wheel in pairs(wheelsFolder:GetChildren()) do
-			local isFront = wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F"
-			if isFront then
-				local steerPart = wheel:FindFirstChild("Arm") and wheel.Arm:FindFirstChild("Steer")
-				local basePart  = wheel:FindFirstChild("Base")
-				if steerPart and basePart then
-					local angle = currentSteer * maxAngle
-					-- FL/FR mają różny kąt (Ackermann) - uproszczone
-					if wheel.Name == "FL" then
-						steerPart.CFrame = basePart.CFrame * CFrame.Angles(0, -math.rad(angle * 1.05), 0)
-					elseif wheel.Name == "FR" then
-						steerPart.CFrame = basePart.CFrame * CFrame.Angles(0, -math.rad(angle * 0.95), 0)
-					else
-						steerPart.CFrame = basePart.CFrame * CFrame.Angles(0, -math.rad(angle), 0)
-					end
-				end
-			end
+		for _, motor in pairs(motors) do
+			motor.MotorMaxTorque = 1e7
+			motor.MotorMaxAcceleration = 1e5
+			motor.AngularVelocity = 350
 		end
 
-		-- Ustaw #AV i #BV osobno dla każdego koła
-		for _, wheel in pairs(wheelsFolder:GetChildren()) do
-			local av = wheel:FindFirstChild("#AV")
-			local bv = wheel:FindFirstChild("#BV")
-
-			-- Napęd tylko na kołach napędowych
-			local isDrive = false
-			if Tune.Config == "RWD" then
-				isDrive = wheel.Name == "RL" or wheel.Name == "RR" or wheel.Name == "R"
-			elseif Tune.Config == "FWD" then
-				isDrive = wheel.Name == "FL" or wheel.Name == "FR" or wheel.Name == "F"
-			elseif Tune.Config == "AWD" then
-				isDrive = true
-			end
-
-			if av then
-				av.ActuatorType    = Enum.ActuatorType.Motor
-				av.AngularVelocity = targetAV   -- zawsze do przodu
-				-- Napędowe: duży torque; nienapędowe: 0 (toczą się swobodnie)
-				av.MotorMaxTorque  = isDrive and 50000 or 0
-			end
-
-			if bv then
-				bv.ActuatorType   = Enum.ActuatorType.Motor
-				bv.AngularVelocity = 0
-				bv.MotorMaxTorque  = 0  -- brak hamowania!
-			end
-		end
-
-		-- Wymuś prędkość karoserii (synchronizacja z kołami = brak poślizgu)
-		local look  = seat.CFrame.LookVector
-		local flat  = Vector3.new(look.X, 0, look.Z).Unit
-		local right = seat.CFrame.RightVector
-		seat.AssemblyLinearVelocity = flat * targetSpeedMs
-			+ Vector3.new(right.X, 0, right.Z).Unit * (currentSteer * 2)
-			+ Vector3.new(0, -5, 0)
-
-		FakePlate.CFrame = CFrame.new(
-			seat.Position.X,
-			FakePlatePosition.Y,
-			seat.Position.Z
+		-- Stabilizacja pozioma + skręt przez AngularVelocity
+		local rootPos = seat.Position
+		local look = seat.CFrame.LookVector
+		seat.CFrame = CFrame.lookAt(
+			Vector3.new(rootPos.X, rootPos.Y, rootPos.Z),
+			Vector3.new(rootPos.X + look.X, rootPos.Y, rootPos.Z + look.Z)
 		)
+
+		-- Skręt: obracamy auto w osi Y płynnie
+		seat.AssemblyAngularVelocity = Vector3.new(0, currentYaw, 0)
+
+		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
 
 		task.wait()
 
 		if AutoFarm == false then
-			for _, wheel in pairs(wheelsFolder:GetChildren()) do
-				local av = wheel:FindFirstChild("#AV")
-				local bv = wheel:FindFirstChild("#BV")
-				if av then av.MotorMaxTorque = 0 end
-				if bv then bv.MotorMaxTorque = 5000 end
-			end
+			for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 			for _, s in pairs(Vehicle:GetDescendants()) do
 				if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
 					s.Disabled = false
@@ -347,20 +288,13 @@ function DriveDistance(Vehicle, additionalKm)
 		end
 	end
 
-	-- Zatrzymaj i przywróć
-	for _, wheel in pairs(wheelsFolder:GetChildren()) do
-		local av = wheel:FindFirstChild("#AV")
-		local bv = wheel:FindFirstChild("#BV")
-		if av then av.MotorMaxTorque = 0 end
-		if bv then bv.MotorMaxTorque = 5000 end
-	end
+	for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 	for _, s in pairs(Vehicle:GetDescendants()) do
 		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
 			s.Disabled = false
 		end
 	end
 
-	if seat then seat.AssemblyLinearVelocity = Vector3.new(0, 0, 0) end
 	return true
 end
 
