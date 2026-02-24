@@ -265,7 +265,13 @@ function DriveDistance(Vehicle, additionalKm)
 		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
 
 		task.wait()
-		if AutoFarm == false then 
+		if AutoFarm == false then
+			for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
+			for _, s in pairs(Vehicle:GetDescendants()) do
+				if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
+					s.Disabled = false
+				end
+			end
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
