@@ -214,6 +214,18 @@ function DriveDistance(Vehicle, additionalKm)
 	task.wait(0.5)
 
 	local lastUpdate = tick()
+	
+	local CollisionData = {}
+
+	for _, part in pairs(Vehicle:GetDescendants()) do
+		if part:IsA("BasePart") then
+			CollisionData[part] = part.CanCollide
+
+			if part.Name:lower():find("wheel") or part.Name:lower():find("tire") or part:IsA("MeshPart") then
+				part.CanCollide = false
+			end
+		end
+	end
 
 	while tonumber(mileageVal.Value) < targetKm do
 		if seat then
@@ -245,13 +257,22 @@ function DriveDistance(Vehicle, additionalKm)
 			lastUpdate = tick()
 		end
 		if AutoFarm == false then
+			for part, originalState in pairs(CollisionData) do
+				if part and part.Parent then part.CanCollide = originalState end
+			end
 			teleportBrokenCar(Vehicle, SafePlaceAfterStop)
 			return false
 		end
 
 		task.wait() 
 	end
-
+	
+	for part, originalState in pairs(CollisionData) do
+		if part and part.Parent then
+			part.CanCollide = originalState
+		end
+	end
+	
 	if seat then seat.AssemblyLinearVelocity = Vector3.new(0,0,0) end
 	return true
 end
