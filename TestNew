@@ -233,7 +233,12 @@ function DriveDistance(Vehicle, additionalKm)
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
 	
 	local pbrakeTimer = tick()
+	local SteerLeftTimer = tick()
+	local SteerRightTimer = tick()
+	local ResetSteerTimer = tick()
 	
+	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds:WaitForChild("SteerLeft")
+	local SteerRightBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds:WaitForChild("SteerRight")
 	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
 	
 	while tonumber(mileageVal.Value) < targetKm do
@@ -251,6 +256,19 @@ function DriveDistance(Vehicle, additionalKm)
 			pbrakeTimer = now
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
+		
+		if now - SteerLeftTimer > 5 then
+			SteerLeftBind:Fire(CFrame.new(25, 0, 0))
+		end
+		
+		if now - SteerRightTimer > 8 then
+			SteerRightBind:Fire(CFrame.new(25, 0, 0))
+		end
+		
+		if now - ResetSteerTimer > 10 then
+			SteerRightBind:Fire(CFrame.new(0, 0, 0))
+		end
+		
 		
 		-- 5. STABILIZACJA (CFrame)
 		local rootPos = seat.Position
