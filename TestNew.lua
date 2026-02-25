@@ -506,18 +506,19 @@ function DriveDistance(Vehicle, additionalKm)
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
 
-		if now - SteerTimer > 3 then
+		if now - SteerTimer > 5 then
 			SteerTimer = now
 			if CurrentSteer == "Left" then
 				CurrentSteer = "Reset"
-				SteerRightBind:Fire(CFrame.new(3, 0, 0))
+				SteerLeftBind:Fire(CFrame.new(2, 0, 0))
 			elseif CurrentSteer == "Right" then
 				CurrentSteer = "Left"
-				SteerRightBind:Fire(CFrame.new(0, 0, 0))
-				SteerLeftBind:Fire(CFrame.new(0, 0, 0))
+				SteerRightBind:Fire(CFrame.new(2, 0, 0))
 			elseif CurrentSteer == "Reset" then
 				CurrentSteer = "Right"
-				SteerLeftBind:Fire(CFrame.new(3, 0, 0))
+				SteerRightBind:Fire(CFrame.new(0, 0, 0))
+				SteerLeftBind:Fire(CFrame.new(0, 0, 0))
+				
 			end
 		end
 
