@@ -585,7 +585,7 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 		if AutoFarm == false then
 			return false
 		end
-		
+		task.wait(0.3)
 		return true
 	else
 		return nil
@@ -1029,6 +1029,7 @@ function FixParts()
 	
 	if CurrentCar then
 		teleportBrokenCar(CurrentCar, RepairShopPos)
+		task.wait(0.5)
 	end
 	
 	if CurrentCar and RepairShop and TeleportPart then
