@@ -294,6 +294,7 @@ ToggleButton.MouseButton1Click:Connect(function()
 	if AutoFarm == false then
 		AutoFarm = true
 		ToggleButton.BackgroundColor3 = Color3.fromRGB(33, 94, 0)
+		Frame.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
 		local NewTweenInfo = TweenInfo.new(
 			0.2,
 			Enum.EasingStyle.Sine,
@@ -313,6 +314,7 @@ ToggleButton.MouseButton1Click:Connect(function()
 	else
 		AutoFarm = false
 		ToggleButton.BackgroundColor3 = Color3.fromRGB(71, 0, 0)
+		Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 		local NewTweenInfo = TweenInfo.new(
 			0.2,
 			Enum.EasingStyle.Sine,
