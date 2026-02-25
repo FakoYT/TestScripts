@@ -40,8 +40,8 @@ MainBackFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainBackFrame.BackgroundTransparency = 1.000
 MainBackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MainBackFrame.BorderSizePixel = 0
-MainBackFrame.Position = UDim2.new(0.15, 0,0.4, 0)
-MainBackFrame.Size = UDim2.new(0.137, 0,0.198, 0)
+MainBackFrame.Position = UDim2.new(0.15, 0, 0.435950398, 0)
+MainBackFrame.Size = UDim2.new(0, 263, 0, 214)
 MainBackFrame.Active = false
 
 UIDragD.Parent = MainBackFrame
@@ -58,7 +58,7 @@ HeaderFrame.BorderSizePixel = 0
 HeaderFrame.ClipsDescendants = true
 HeaderFrame.LayoutOrder = 1
 HeaderFrame.Position = UDim2.new(0.497668833, 0, 0.125801876, 0)
-HeaderFrame.Size = UDim2.new(1.004, 0,0.224, 0)
+HeaderFrame.Size = UDim2.new(0, 264, 0, 48)
 HeaderFrame.ZIndex = 2
 
 local HeaderFrameStroke = Instance.new("UIStroke")
@@ -93,7 +93,6 @@ Minimize.MouseButton1Click:Connect(function()
 			Enum.EasingDirection.In
 		)
 		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,-0.774, 0)}):Play()
-		BackgroundFrame.Interactable = false
 		MinimizedFrame = true
 	else
 		local CurTweenInfo = TweenInfo.new(
@@ -102,7 +101,6 @@ Minimize.MouseButton1Click:Connect(function()
 			Enum.EasingDirection.In
 		)
 		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,0.47, 0)}):Play()
-		BackgroundFrame.Interactable = true
 		MinimizedFrame = false
 	end
 	
@@ -136,7 +134,7 @@ Title.BackgroundTransparency = 1.000
 Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Title.BorderSizePixel = 0
 Title.Position = UDim2.new(0.390151501, 0, 0.291666657, 0)
-Title.Size = UDim2.new(0.78, 0,0.604, 0)
+Title.Size = UDim2.new(0, 206, 0, 29)
 Title.Font = Enum.Font.GothamBold
 Title.Text = "FIX IT UP AUTOFARM"
 Title.TextColor3 = Color3.fromRGB(255, 255, 255)
@@ -159,7 +157,7 @@ Author.BackgroundTransparency = 1.000
 Author.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Author.BorderSizePixel = 0
 Author.Position = UDim2.new(0.227272734, 0, 0.796371758, 0)
-Author.Size = UDim2.new(0.455, 0,0.396, 0)
+Author.Size = UDim2.new(0, 120, 0, 19)
 Author.Font = Enum.Font.GothamBold
 Author.Text = "Made by: Fake2Big"
 Author.TextColor3 = Color3.fromRGB(255, 255, 255)
