@@ -1,41 +1,276 @@
-local nbvcuytrkijuhygt = Instance.new("ScreenGui")
-local ActiveBtn = Instance.new("TextButton")
+local FarmMainGUI = Instance.new("ScreenGui")
+local MainBackFrame = Instance.new("Frame")
+local HeaderFrame = Instance.new("Frame")
+local Minimize = Instance.new("TextButton")
 local UICorner = Instance.new("UICorner")
-local UIStroke = Instance.new("UIStroke")
+local ImageLabel = Instance.new("ImageLabel")
+local Title = Instance.new("TextLabel")
+local Author = Instance.new("TextLabel")
+local BackgroundFrame = Instance.new("Frame")
+local MainFrame = Instance.new("Frame")
+local CarsSoldLabel = Instance.new("TextLabel")
+local AutofarmFrame = Instance.new("Frame")
+local AutofarmLabel = Instance.new("TextLabel")
+local ToggleButton = Instance.new("TextButton")
+local UICorner_2 = Instance.new("UICorner")
+local Frame = Instance.new("Frame")
+local UICorner_3 = Instance.new("UICorner")
+local UIDragD = Instance.new("UIDragDetector")
 
-if game.CoreGui:FindFirstChild("nbvcuytrkijuhygt") then
-	game.CoreGui.nbvcuytrkijuhygt:Destroy()
+local TweenS = game:GetService("TweenService")
+
+local function RandomName(length)
+	local chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	local name = ""
+	for i = 1, length do
+		local rand = math.random(1, #chars)
+		name = name .. chars:sub(rand, rand)
+	end
+	return name
 end
 
-nbvcuytrkijuhygt.Name = "nbvcuytrkijuhygt"
-nbvcuytrkijuhygt.Parent = game.CoreGui
-nbvcuytrkijuhygt.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
-nbvcuytrkijuhygt.ResetOnSpawn = false
+FarmMainGUI.Name = RandomName(10)
+FarmMainGUI.Parent = game.CoreGui
+FarmMainGUI.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-ActiveBtn.Name = "ActiveBtn"
-ActiveBtn.Parent = nbvcuytrkijuhygt
-ActiveBtn.AnchorPoint = Vector2.new(0.5, 0.5)
-ActiveBtn.BackgroundColor3 = Color3.fromRGB(49, 49, 49)
-ActiveBtn.BackgroundTransparency = 0.450
-ActiveBtn.BorderColor3 = Color3.fromRGB(0, 0, 0)
-ActiveBtn.BorderSizePixel = 0
-ActiveBtn.Position = UDim2.new(0.0843750015, 0, 0.949403882, 0)
-ActiveBtn.Size = UDim2.new(0.154687494, 0, 0.0805555582, 0)
-ActiveBtn.Font = Enum.Font.FredokaOne
-ActiveBtn.Text = "Autofarm: false"
-ActiveBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-ActiveBtn.TextScaled = true
-ActiveBtn.TextSize = 14.000
-ActiveBtn.TextWrapped = true
+MainBackFrame.Name = "MainBackFrame"
+MainBackFrame.Parent = FarmMainGUI
+MainBackFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainBackFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+MainBackFrame.BackgroundTransparency = 1.000
+MainBackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainBackFrame.BorderSizePixel = 0
+MainBackFrame.Position = UDim2.new(0.363565832, 0, 0.435950398, 0)
+MainBackFrame.Size = UDim2.new(0, 263, 0, 214)
 
-UICorner.CornerRadius = UDim.new(0, 18)
-UICorner.Parent = ActiveBtn
+UIDragD.Parent = MainBackFrame
+UIDragD.BoundingUI = HeaderFrame
 
-UIStroke.Name = "UIStroke"
-UIStroke.Color = Color3.fromRGB(255, 0, 0)
-UIStroke.Thickness = 4.2
-UIStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
-UIStroke.Parent = ActiveBtn
+HeaderFrame.Name = "HeaderFrame"
+HeaderFrame.Parent = MainBackFrame
+HeaderFrame.Active = true
+HeaderFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+HeaderFrame.BackgroundColor3 = Color3.fromRGB(52, 52, 52)
+HeaderFrame.BackgroundTransparency = 0.550
+HeaderFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+HeaderFrame.BorderSizePixel = 0
+HeaderFrame.ClipsDescendants = true
+HeaderFrame.LayoutOrder = 1
+HeaderFrame.Position = UDim2.new(0.497668833, 0, 0.125801876, 0)
+HeaderFrame.Size = UDim2.new(0, 264, 0, 48)
+HeaderFrame.ZIndex = 2
+
+local HeaderFrameStroke = Instance.new("UIStroke")
+HeaderFrameStroke.Parent = HeaderFrame
+HeaderFrameStroke.Color = Color3.fromRGB(43, 43, 43)
+HeaderFrameStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+HeaderFrameStroke.Thickness = 1
+HeaderFrameStroke.Transparency = 0
+
+Minimize.Name = "Minimize"
+Minimize.Parent = HeaderFrame
+Minimize.AnchorPoint = Vector2.new(0.5, 0.5)
+Minimize.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+Minimize.BackgroundTransparency = 0.850
+Minimize.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Minimize.BorderSizePixel = 0
+Minimize.Position = UDim2.new(0.924242437, 0, 0.291666985, 0)
+Minimize.Size = UDim2.new(0, 40, 0, 25)
+Minimize.Font = Enum.Font.Unknown
+Minimize.Text = ""
+Minimize.TextColor3 = Color3.fromRGB(0, 0, 0)
+Minimize.TextSize = 14.000
+Minimize.TextWrapped = true
+
+local MinimizedFrame = false
+
+Minimize.MouseButton1Click:Connect(function()
+	if MinimizedFrame == false then
+		local CurTweenInfo = TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.In
+		)
+		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,-0.774, 0)}):Play()
+		MinimizedFrame = true
+	else
+		local CurTweenInfo = TweenInfo.new(
+			0.5,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.In
+		)
+		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,0.47, 0)}):Play()
+		MinimizedFrame = false
+	end
+	
+end)
+
+local MinimizeStroke = Instance.new("UIStroke")
+MinimizeStroke.Parent = Minimize
+MinimizeStroke.Color = Color3.fromRGB(0, 255, 238)
+MinimizeStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+MinimizeStroke.Thickness = 1
+MinimizeStroke.Transparency = 0
+
+UICorner.CornerRadius = UDim.new(0.300000012, 0)
+UICorner.Parent = Minimize
+
+ImageLabel.Parent = Minimize
+ImageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+ImageLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+ImageLabel.BackgroundTransparency = 1.000
+ImageLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ImageLabel.BorderSizePixel = 0
+ImageLabel.Position = UDim2.new(0.5, 0, 0.465000004, 0)
+ImageLabel.Size = UDim2.new(0, 40, 0, 24)
+ImageLabel.Image = "rbxassetid://16381269"
+
+Title.Name = "Title"
+Title.Parent = HeaderFrame
+Title.AnchorPoint = Vector2.new(0.5, 0.5)
+Title.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Title.BackgroundTransparency = 1.000
+Title.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Title.BorderSizePixel = 0
+Title.Position = UDim2.new(0.390151501, 0, 0.291666657, 0)
+Title.Size = UDim2.new(0, 206, 0, 29)
+Title.Font = Enum.Font.GothamBold
+Title.Text = "FIX IT UP AUTOFARM"
+Title.TextColor3 = Color3.fromRGB(255, 255, 255)
+Title.TextScaled = true
+Title.TextSize = 14.000
+Title.TextWrapped = true
+
+local TitleStroke = Instance.new("UIStroke")
+TitleStroke.Parent = Title
+TitleStroke.Color = Color3.fromRGB(0,0,0)
+TitleStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+TitleStroke.Thickness = 2
+TitleStroke.Transparency = 0
+
+Author.Name = "Author"
+Author.Parent = HeaderFrame
+Author.AnchorPoint = Vector2.new(0.5, 0.5)
+Author.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+Author.BackgroundTransparency = 1.000
+Author.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Author.BorderSizePixel = 0
+Author.Position = UDim2.new(0.227272734, 0, 0.796371758, 0)
+Author.Size = UDim2.new(0, 120, 0, 19)
+Author.Font = Enum.Font.GothamBold
+Author.Text = "Made by: Fake2Big"
+Author.TextColor3 = Color3.fromRGB(255, 255, 255)
+Author.TextScaled = true
+Author.TextSize = 14.000
+Author.TextWrapped = true
+
+local AuthorStroke = Instance.new("UIStroke")
+AuthorStroke.Parent = Author
+AuthorStroke.Color = Color3.fromRGB(72, 0, 255)
+AuthorStroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Contextual
+AuthorStroke.Thickness = 0.3
+AuthorStroke.Transparency = 0
+
+BackgroundFrame.Name = "BackgroundFrame"
+BackgroundFrame.Parent = MainBackFrame
+BackgroundFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+BackgroundFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+BackgroundFrame.BackgroundTransparency = 1.000
+BackgroundFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+BackgroundFrame.BorderSizePixel = 0
+BackgroundFrame.ClipsDescendants = true
+BackgroundFrame.LayoutOrder = 1
+BackgroundFrame.Position = UDim2.new(0.497915298, 0, 0.627018631, 0)
+BackgroundFrame.Size = UDim2.new(0, 284, 0, 164)
+BackgroundFrame.ZIndex = 2
+
+MainFrame.Name = "MainFrame"
+MainFrame.Parent = BackgroundFrame
+MainFrame.AnchorPoint = Vector2.new(0.5, 0.5)
+MainFrame.BackgroundColor3 = Color3.fromRGB(72, 72, 72)
+MainFrame.BackgroundTransparency = 0.600
+MainFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+MainFrame.BorderSizePixel = 0
+MainFrame.ClipsDescendants = true
+MainFrame.Position = UDim2.new(0.497823149, 0, 0.469637424, 0)
+MainFrame.Size = UDim2.new(0.879999995, 0, 0.960294724, 0)
+MainFrame.ZIndex = 0
+
+CarsSoldLabel.Name = RandomName(9)
+CarsSoldLabel.Parent = MainFrame
+CarsSoldLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+CarsSoldLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+CarsSoldLabel.BackgroundTransparency = 1.000
+CarsSoldLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+CarsSoldLabel.BorderSizePixel = 0
+CarsSoldLabel.Position = UDim2.new(0.49903971, 0, 0.246706083, 0)
+CarsSoldLabel.Size = UDim2.new(0, 249, 0, 40)
+CarsSoldLabel.Font = Enum.Font.Gotham
+CarsSoldLabel.Text = "Sold cars: 0"
+CarsSoldLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+CarsSoldLabel.TextScaled = true
+CarsSoldLabel.TextSize = 14.000
+CarsSoldLabel.TextWrapped = true
+
+AutofarmFrame.Name = RandomName(9)
+AutofarmFrame.Parent = MainFrame
+AutofarmFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+AutofarmFrame.BackgroundTransparency = 1.000
+AutofarmFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AutofarmFrame.BorderSizePixel = 0
+AutofarmFrame.Position = UDim2.new(0, 0, 0.481541783, 0)
+AutofarmFrame.Size = UDim2.new(0, 249, 0, 81)
+
+local AutoFFstroke = Instance.new("UIStroke")
+AutoFFstroke.Parent = AutofarmFrame
+AutoFFstroke.Color = Color3.fromRGB(76, 0, 240)
+AutoFFstroke.ApplyStrokeMode = Enum.ApplyStrokeMode.Border
+AutoFFstroke.Thickness = 0.6
+AutoFFstroke.Transparency = 0.65
+
+AutofarmLabel.Name = RandomName(9)
+AutofarmLabel.Parent = AutofarmFrame
+AutofarmLabel.AnchorPoint = Vector2.new(0.5, 0.5)
+AutofarmLabel.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+AutofarmLabel.BackgroundTransparency = 1.000
+AutofarmLabel.BorderColor3 = Color3.fromRGB(0, 0, 0)
+AutofarmLabel.BorderSizePixel = 0
+AutofarmLabel.Position = UDim2.new(0.367135942, 0, 0.508078098, 0)
+AutofarmLabel.Size = UDim2.new(0, 182, 0, 40)
+AutofarmLabel.Font = Enum.Font.Gotham
+AutofarmLabel.Text = "TOGGLE AUTOFARM:"
+AutofarmLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+AutofarmLabel.TextScaled = true
+AutofarmLabel.TextSize = 14.000
+AutofarmLabel.TextWrapped = true
+
+ToggleButton.Name = "ToggleButton"
+ToggleButton.Parent = AutofarmFrame
+ToggleButton.AnchorPoint = Vector2.new(0.5, 0.5)
+ToggleButton.BackgroundColor3 = Color3.fromRGB(71, 0, 0)
+ToggleButton.BackgroundTransparency = 0.350
+ToggleButton.BorderColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.BorderSizePixel = 0
+ToggleButton.Position = UDim2.new(0.863625288, 0, 0.520040274, 0)
+ToggleButton.Size = UDim2.new(0, 59, 0, 32)
+ToggleButton.Font = Enum.Font.SourceSans
+ToggleButton.Text = ""
+ToggleButton.TextColor3 = Color3.fromRGB(0, 0, 0)
+ToggleButton.TextSize = 14.000
+
+UICorner_2.CornerRadius = UDim.new(0.899999976, 0)
+UICorner_2.Parent = ToggleButton
+
+Frame.Parent = ToggleButton
+Frame.AnchorPoint = Vector2.new(0.5, 0.5)
+Frame.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+Frame.BorderColor3 = Color3.fromRGB(0, 0, 0)
+Frame.BorderSizePixel = 0
+Frame.Position = UDim2.new(0.219178081, 0, 0.5, 0)
+Frame.Size = UDim2.new(0, 32, 0, 32)
+
+UICorner_3.CornerRadius = UDim.new(1, 0)
+UICorner_3.Parent = Frame
 
 local Player = game.Players.LocalPlayer
 local SearchedForName = "PitStop Repair2"
@@ -55,12 +290,17 @@ local AutoFarm = false
 
 local ConfirmationRemote = ReplicatedStorage:WaitForChild("Events"):WaitForChild("HUD"):WaitForChild("Confirmation")
 
-ActiveBtn.MouseButton1Click:Connect(function()
+ToggleButton.MouseButton1Click:Connect(function()
 	if AutoFarm == false then
 		AutoFarm = true
-		ActiveBtn.Text = "Autofarm: true"
-		UIStroke.Color = Color3.fromRGB(0, 255, 0)
-		
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(33, 94, 0)
+		local NewTweenInfo = TweenInfo.new(
+			0.2,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.In
+		)
+		TweenS:Create(Frame, NewTweenInfo, {Position = UDim2.new(0.728, 0,0.5, 0)}):Play()
+
 		ConfirmationRemote.OnClientInvoke = function(message)
 			if AutoFarm == true then
 				return true
@@ -72,9 +312,14 @@ ActiveBtn.MouseButton1Click:Connect(function()
 		end
 	else
 		AutoFarm = false
-		ActiveBtn.Text = "Autofarm: false"
-		UIStroke.Color = Color3.fromRGB(255, 0, 0)
-		
+		ToggleButton.BackgroundColor3 = Color3.fromRGB(71, 0, 0)
+		local NewTweenInfo = TweenInfo.new(
+			0.2,
+			Enum.EasingStyle.Sine,
+			Enum.EasingDirection.In
+		)
+		TweenS:Create(Frame, NewTweenInfo, {Position = UDim2.new(0.728, 0,0.5, 0)}):Play()
+
 		ConfirmationRemote.OnClientInvoke = nil
 	end
 end)
@@ -210,7 +455,7 @@ function DriveDistance(Vehicle, additionalKm)
 	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
 
 	FakePlate.Position = FakePlatePosition
-	
+
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
 
 	-- 2. KONFIGURACJA SILNIKÓW I SKRĘTU
@@ -231,16 +476,16 @@ function DriveDistance(Vehicle, additionalKm)
 
 	local mileageVal = Player.PlayerData.Status.KMs
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
-	
+
 	local pbrakeTimer = tick()
 	local SteerTimer = tick()
-	
+
 	local CurrentSteer = "Left"
-	
+
 	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerLeft")
 	local SteerRightBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerRight")
 	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
-	
+
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
 		-- 3. USTAWIANIE PRĘDKOŚCI (Brute Force)
@@ -250,13 +495,13 @@ function DriveDistance(Vehicle, additionalKm)
 			motor.MotorMaxAcceleration = 1e5
 			motor.AngularVelocity = 350 
 		end
-		
-		
+
+
 		if now - pbrakeTimer > 0.3 then
 			pbrakeTimer = now
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
-		
+
 		if now - SteerTimer > 5 then
 			SteerTimer = now
 			if CurrentSteer == "Left" then
@@ -271,8 +516,8 @@ function DriveDistance(Vehicle, additionalKm)
 				SteerLeftBind:Fire(CFrame.new(25, 0, 0))
 			end
 		end
-		
-		
+
+
 		-- 5. STABILIZACJA (CFrame)
 		local rootPos = seat.Position
 
@@ -359,7 +604,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 						local att = drill and drill:FindFirstChild("Attachment")
 						ParticleE = att and att:FindFirstChild("CUTS")
 					until ParticleE or AutoFarm == false
-					
+
 				elseif MachineName == "BatteryCharger" then
 					repeat
 						Player:RequestStreamAroundAsync(v:GetModelCFrame().p, 5)
@@ -370,7 +615,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 						local primary = clamp and clamp:FindFirstChild("Primary")
 						ParticleE = primary and primary:FindFirstChild("Particles")	
 					until ParticleE or AutoFarm == false
-					
+
 				elseif MachineName == "PartsWasher" then
 					repeat
 						Player:RequestStreamAroundAsync(v:GetModelCFrame().p, 5)
@@ -379,7 +624,7 @@ function GetMachines(RepairShop, MachineName) -- Get all avaible repair machines
 						local att = water and water:FindFirstChild("Attachment")
 						ParticleE = att and att:FindFirstChild("MAIN SPRAY")	
 					until ParticleE or AutoFarm == false
-					
+
 				end
 				if ParticleE and ParticleE.Enabled == false then
 					table.insert(Machines, v)
@@ -586,7 +831,7 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 		end
 
 		carModel.PrimaryPart = seat
-		
+
 		local attempts = 0
 		repeat
 			carModel:SetPrimaryPartCFrame(targetCFrame)
@@ -597,10 +842,10 @@ function teleportBrokenCar(carModel, targetCFrame) -- Safe teleport car
 					part.AssemblyAngularVelocity = Vector3.new(0, 0, 0)
 				end
 			end
-			
+
 			task.wait(0.3)
 			attempts = attempts + 1
-			
+
 			local distance = (seat.Position - targetCFrame.Position).Magnitude
 		until distance < 5 or attempts > 15 or AutoFarm == false
 		if AutoFarm == false then
@@ -687,7 +932,7 @@ function SellCar(Vehicle) -- sells car
 		end
 		SellCargGuy = Map:FindFirstChild("SellCar")
 	end
-	
+
 	local SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	if not SellCarGuyHRP then
 		DebugWarn("[SellCar] - SellCar guy HumanoidRootPart not found, requesting stream (updated 2)")
@@ -702,7 +947,7 @@ function SellCar(Vehicle) -- sells car
 		end
 		SellCarGuyHRP = SellCargGuy:FindFirstChild("HumanoidRootPart")
 	end
-	
+
 	local prompt = SellCargGuy:FindFirstChild("Prompt").ProximityPrompt
 	if SellCarGuyHRP and prompt then
 		local VehicleName = Vehicle.Name
@@ -723,7 +968,7 @@ function SellCar(Vehicle) -- sells car
 			if AutoFarm == false then
 				return false
 			end
-			
+
 			task.wait()
 			TeleportOnlyPlayer(SellCarGuyHRP.CFrame * CFrame.new(math.random(-5, 5), math.random(0, 5), -5))
 			task.wait(0.3)
@@ -846,7 +1091,7 @@ end
 function CleanUpUselessParts()
 	local MoveableParts = game.Workspace:FindFirstChild("MoveableParts")
 	local TrashPart = game.Workspace:FindFirstChild("Map"):FindFirstChild("PartTrashCan")
-	
+
 	if MoveableParts and TrashPart and TrashPart.PrimaryPart then
 		local Parts = {}
 
@@ -858,7 +1103,7 @@ function CleanUpUselessParts()
 				end
 			end
 		end
-		
+
 		if #Parts > 0 and #Parts > 5 then
 			for _, mPart in pairs(Parts) do
 				if mPart.PrimaryPart then
@@ -867,11 +1112,11 @@ function CleanUpUselessParts()
 				else
 					DebugWarn("[CleanUpUselessParts] - No primary part for part: " .. mPart.Name)
 				end
-				
+
 			end
 			DebugPrint("Cleaned up useless parts")
 		end
-		
+
 	end
 end
 
@@ -879,7 +1124,7 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 	for index, Rpart in pairs(ToGrindParts) do
 		local Machine = GMachinesTable[index]
 		if not Machine or not Machine.Parent or not Rpart.Parent then continue end
-		
+
 		local Detector = Machine:FindFirstChild("Detector")
 		if not Detector then
 			local RepeatCount = 0
@@ -892,7 +1137,7 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 				return false
 			end
 		end
-		
+
 		Detector = Machine:FindFirstChild("Detector")
 		if Machine and Detector and Rpart.PrimaryPart then
 			Rpart.PrimaryPart.CFrame = Detector.CFrame
@@ -1008,7 +1253,7 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 			task.wait(0.2)
 
 			local Button = Machine:FindFirstChild("Button")
-			
+
 			local Clamps = Machine:FindFirstChild("Clamps")
 			local Neg = Clamps and Clamps:FindFirstChild("Negative")
 			local Clamp = Neg and Neg:FindFirstChild("Clamp")
@@ -1045,15 +1290,15 @@ end
 
 function FixParts()
 	local CurrentCar = GetCurrentCar()
-	
+
 	local RepairShop, TeleportPart = FindRepairShop()
-	
+
 	if CurrentCar then
 		task.wait(1)
 		teleportBrokenCar(CurrentCar, RepairShopPos)
 		task.wait(0.5)
 	end
-	
+
 	if CurrentCar and RepairShop and TeleportPart then
 		local GMachinesTable = GetMachines(RepairShop, "GrindingMachine")
 		local BChargersTable = GetMachines(RepairShop, "BatteryCharger")
@@ -1084,7 +1329,7 @@ function FixParts()
 			local ToGrindParts = GetToMachineParts(ToRepair, "GrindingMachine")
 			local ToWashParts = GetToMachineParts(ToRepair, "PartsWasher")
 			local ToChargeParts = GetToMachineParts(ToRepair, "BatteryCharger")
-			
+
 			local function FullCleanup()
 				ToRepair = nil
 				RepairingParts = nil
@@ -1313,7 +1558,7 @@ function BuyBestCar()
 			TeleportOnlyPlayer(CFrame.new(BestCar:GetModelCFrame().p))
 			return false
 		end
-		
+
 		if BestCarEngine and ClickD then
 			ClickD.MaxActivationDistance = 1000
 			local RepeatTimes = 0
@@ -1341,7 +1586,7 @@ function BuyBestCar()
 					return false
 				end
 
-				
+
 				if BestCarEngine and ClickD then
 					if GetCurrentCar() == nil then
 						ClickD.MaxActivationDistance = 1000
@@ -1391,11 +1636,11 @@ local WorkingOnCurrentCar = nil
 while true do
 	if AutoFarm == true then
 		local currentCar = GetCurrentCar()
-		
+
 		if #AlreadyDrivenCars > 6 then
 			AlreadyDrivenCars = {}
 		end
-		
+
 		if not currentCar then
 			if not WorkingOnCurrentCar then
 				DebugPrint("Status: No car - buying new...")
@@ -1414,7 +1659,7 @@ while true do
 						FoundCar = ownedCar
 					end
 				end
-				
+
 				if OwnedCarsTable and FoundCar then
 					-- Spawn car event (MAY BE SOME ERRORS HERE DUE TO NOT CHECKING IF EVENT EXISTS)
 					local RemoteLpath = ReplicatedStorage:WaitForChild("Events", 5):WaitForChild("Vehicles", 5):WaitForChild("RemoteLoad", 5)
@@ -1477,7 +1722,7 @@ while true do
 						teleportBrokenCar(currentCar, SafePlaceAfterStop)
 						task.wait(0.2)
 						local sold = SellCar(currentCar)
-						
+
 						if sold then
 							WorkingOnCurrentCar = nil
 							if table.find(AlreadyDrivenCars, currentCar.Name) then
