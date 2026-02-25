@@ -47,6 +47,8 @@ local JunkYardPos1 = CFrame.new(-1827.22705, 5.28211546, -385.016663)
 local JunkYardPos2 = CFrame.new(-1719.62060546875, 8.656662940979004, -169.21669006347656)
 local JunkYardPos3 = CFrame.new(-1593.890625, 9.363893508911133, -66.71568298339844)
 
+local RepairShopPos = CFrame.new(-867.0195922851562, 4.924209117889404, -1300.7401123046875)
+
 local SellGuyCarPos = CFrame.new(-1872.0494384765625, 4.898039817810059, -776.1437377929688)
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local AutoFarm = false
@@ -1022,8 +1024,12 @@ end
 
 function FixParts()
 	local CurrentCar = GetCurrentCar()
-
+	
 	local RepairShop, TeleportPart = FindRepairShop()
+	
+	if CurrentCar then
+		teleportBrokenCar(CurrentCar, RepairShopPos)
+	end
 	
 	if CurrentCar and RepairShop and TeleportPart then
 		local GMachinesTable = GetMachines(RepairShop, "GrindingMachine")
@@ -1227,6 +1233,7 @@ function FixParts()
 			end
 		end
 	else
+		DebugWarn("Car not detected/Repairshop not detected")
 		return false
 	end
 end
