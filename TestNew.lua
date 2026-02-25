@@ -58,7 +58,7 @@ HeaderFrame.BorderSizePixel = 0
 HeaderFrame.ClipsDescendants = true
 HeaderFrame.LayoutOrder = 1
 HeaderFrame.Position = UDim2.new(0.497668833, 0, 0.125801876, 0)
-HeaderFrame.Size = UDim2.new(0, 264, 0, 48)
+HeaderFrame.Size = UDim2.new(0, 264,0, 48)
 HeaderFrame.ZIndex = 2
 
 local HeaderFrameStroke = Instance.new("UIStroke")
