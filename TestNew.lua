@@ -40,10 +40,9 @@ MainBackFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
 MainBackFrame.BackgroundTransparency = 1.000
 MainBackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MainBackFrame.BorderSizePixel = 0
-MainBackFrame.Position = UDim2.new(0.2, 0,0.4, 0)
+MainBackFrame.Position = UDim2.new(0.15, 0,0.4, 0)
 MainBackFrame.Size = UDim2.new(0.137, 0,0.198, 0)
 MainBackFrame.Active = false
-MainBackFrame.Interactable = false
 
 UIDragD.Parent = MainBackFrame
 UIDragD.BoundingUI = HeaderFrame
@@ -94,6 +93,7 @@ Minimize.MouseButton1Click:Connect(function()
 			Enum.EasingDirection.In
 		)
 		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,-0.774, 0)}):Play()
+		BackgroundFrame.Interactable = false
 		MinimizedFrame = true
 	else
 		local CurTweenInfo = TweenInfo.new(
@@ -102,6 +102,7 @@ Minimize.MouseButton1Click:Connect(function()
 			Enum.EasingDirection.In
 		)
 		TweenS:Create(MainFrame, CurTweenInfo, {Position = UDim2.new(0.498, 0,0.47, 0)}):Play()
+		BackgroundFrame.Interactable = true
 		MinimizedFrame = false
 	end
 	
@@ -186,7 +187,6 @@ BackgroundFrame.Position = UDim2.new(0.497915298, 0, 0.627018631, 0)
 BackgroundFrame.Size = UDim2.new(0, 284, 0, 164)
 BackgroundFrame.ZIndex = 2
 BackgroundFrame.Active = false
-BackgroundFrame.Interactable = false
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = BackgroundFrame
