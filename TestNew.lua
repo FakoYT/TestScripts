@@ -42,6 +42,7 @@ MainBackFrame.BorderColor3 = Color3.fromRGB(0, 0, 0)
 MainBackFrame.BorderSizePixel = 0
 MainBackFrame.Position = UDim2.new(0.363565832, 0, 0.435950398, 0)
 MainBackFrame.Size = UDim2.new(0, 263, 0, 214)
+MainBackFrame.Active = false
 
 UIDragD.Parent = MainBackFrame
 UIDragD.BoundingUI = HeaderFrame
@@ -183,6 +184,7 @@ BackgroundFrame.LayoutOrder = 1
 BackgroundFrame.Position = UDim2.new(0.497915298, 0, 0.627018631, 0)
 BackgroundFrame.Size = UDim2.new(0, 284, 0, 164)
 BackgroundFrame.ZIndex = 2
+BackgroundFrame.Active = false
 
 MainFrame.Name = "MainFrame"
 MainFrame.Parent = BackgroundFrame
@@ -1315,13 +1317,13 @@ function FixParts()
 
 		local VehicleParts = GetVehicleParts(CurrentCar)
 		if VehicleParts and #VehicleParts > 0 then -- Remove every part
-			task.wait(1)
+			task.wait(0.5)
 			TeleportOnlyPlayer(TeleportPart.CFrame * CFrame.new(0, 1, 4))
-			task.wait(0.3)
+			task.wait(1)
 
 			for _, part in pairs(VehicleParts) do
 				RemovePart(CurrentCar, part)
-				task.wait(0.1)
+				task.wait(0.15)
 			end
 		end
 
