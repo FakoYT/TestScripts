@@ -466,16 +466,17 @@ function DriveDistance(Vehicle, additionalKm)
 
 	-- 2. KONFIGURACJA SILNIKÓW I SKRĘTU
 	local motors = {}
-	local steeringHinges = {}
 
 	for _, child in pairs(wheels:GetDescendants()) do
 		if child:IsA("HingeConstraint") then
-			if child.Name == "#AV" or child.Name == "#BV" then
-				table.insert(motors, child)
-				child.ActuatorType = Enum.ActuatorType.Motor
-			elseif child.Name == "#SV" then -- #SV to zazwyczaj Steer Version (Servo)
-				table.insert(steeringHinges, child)
-				child.ActuatorType = Enum.ActuatorType.Servo
+			if child.Parent.Name == "FL" or child.Parent.Name == "FR" then
+				if child.Name == "#AV" or child.Name == "#BV" then
+					table.insert(motors, child)
+					child.ActuatorType = Enum.ActuatorType.Motor
+					--elseif child.Name == "#SV" then -- #SV to zazwyczaj Steer Version (Servo)
+					--	table.insert(steeringHinges, child)
+					--	child.ActuatorType = Enum.ActuatorType.Servo
+				end
 			end
 		end
 	end
