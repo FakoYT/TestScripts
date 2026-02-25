@@ -1739,7 +1739,7 @@ while true do
 							end
 							DebugPrint("--- CAR SOLD ---")
 							task.wait(1)
-							CleanUpUselessParts() -- not working I think
+							--CleanUpUselessParts() -- not working I think
 						else
 							DebugWarn("[Main Loop] - Selling error, retrying...")
 						end
