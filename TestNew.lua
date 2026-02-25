@@ -322,7 +322,7 @@ ToggleButton.MouseButton1Click:Connect(function()
 			Enum.EasingStyle.Sine,
 			Enum.EasingDirection.In
 		)
-		TweenS:Create(Frame, NewTweenInfo, {Position = UDim2.new(0.728, 0,0.5, 0)}):Play()
+		TweenS:Create(Frame, NewTweenInfo, {Position = UDim2.new(0.219, 0,0.5, 0)}):Play()
 
 		ConfirmationRemote.OnClientInvoke = nil
 	end
