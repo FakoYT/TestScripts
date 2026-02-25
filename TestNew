@@ -258,14 +258,17 @@ function DriveDistance(Vehicle, additionalKm)
 		end
 		
 		if now - SteerLeftTimer > 5 then
+			SteerLeftTimer = now
 			SteerLeftBind:Fire(CFrame.new(25, 0, 0))
 		end
 		
 		if now - SteerRightTimer > 8 then
+			SteerRightTimer = now
 			SteerRightBind:Fire(CFrame.new(25, 0, 0))
 		end
 		
 		if now - ResetSteerTimer > 10 then
+			ResetSteerTimer = now
 			SteerRightBind:Fire(CFrame.new(0, 0, 0))
 		end
 		
