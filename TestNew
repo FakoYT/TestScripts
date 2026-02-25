@@ -237,8 +237,8 @@ function DriveDistance(Vehicle, additionalKm)
 	local SteerRightTimer = tick()
 	local ResetSteerTimer = tick()
 	
-	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds:WaitForChild("SteerLeft")
-	local SteerRightBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds:WaitForChild("SteerRight")
+	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerLeft")
+	local SteerRightBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerRight")
 	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
 	
 	while tonumber(mileageVal.Value) < targetKm do
@@ -1046,6 +1046,7 @@ function FixParts()
 	local RepairShop, TeleportPart = FindRepairShop()
 	
 	if CurrentCar then
+		task.wait(1)
 		teleportBrokenCar(CurrentCar, RepairShopPos)
 		task.wait(0.5)
 	end
