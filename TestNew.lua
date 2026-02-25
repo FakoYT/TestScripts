@@ -503,7 +503,7 @@ function DriveDistance(Vehicle, additionalKm)
 		end
 
 
-		if now - pbrakeTimer > 0.3 then
+		if now - pbrakeTimer > 0.2 then
 			pbrakeTimer = now
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
