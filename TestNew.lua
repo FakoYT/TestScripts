@@ -478,6 +478,7 @@ function DriveDistance(Vehicle, additionalKm)
 					--	child.ActuatorType = Enum.ActuatorType.Servo
 				end
 			end
+			
 		end
 	end
 
@@ -513,10 +514,10 @@ function DriveDistance(Vehicle, additionalKm)
 			SteerTimer = now
 			if CurrentSteer == "Left" then
 				CurrentSteer = "Reset"
-				SteerLeftBind:Fire(CFrame.new(2, 0, 0))
+				SteerLeftBind:Fire(CFrame.new(0.5, 0, 0))
 			elseif CurrentSteer == "Right" then
 				CurrentSteer = "Left"
-				SteerRightBind:Fire(CFrame.new(2, 0, 0))
+				SteerRightBind:Fire(CFrame.new(0.5, 0, 0))
 			elseif CurrentSteer == "Reset" then
 				CurrentSteer = "Right"
 				SteerRightBind:Fire(CFrame.new(0, 0, 0))
