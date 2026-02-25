@@ -508,14 +508,14 @@ function DriveDistance(Vehicle, additionalKm)
 			SteerTimer = now
 			if CurrentSteer == "Left" then
 				CurrentSteer = "Right"
-				SteerRightBind:Fire(CFrame.new(25, 0, 0))
+				SteerRightBind:Fire(CFrame.new(12, 0, 0))
 			elseif CurrentSteer == "Right" then
 				CurrentSteer = "Reset"
 				SteerRightBind:Fire(CFrame.new(0, 0, 0))
 				SteerLeftBind:Fire(CFrame.new(0, 0, 0))
 			elseif CurrentSteer == "Reset" then
 				CurrentSteer = "Left"
-				SteerLeftBind:Fire(CFrame.new(25, 0, 0))
+				SteerLeftBind:Fire(CFrame.new(12, 0, 0))
 			end
 		end
 
