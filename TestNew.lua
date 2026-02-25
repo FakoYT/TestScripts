@@ -485,11 +485,11 @@ function DriveDistance(Vehicle, additionalKm)
 
 	local pbrakeTimer = tick()
 	local SteerTimer = tick()
+	local SteerResetTimer = tick()
 
 	local CurrentSteer = "Left"
 
 	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerLeft")
-	local SteerRightBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerRight")
 	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
 
 	while tonumber(mileageVal.Value) < targetKm do
@@ -508,20 +508,14 @@ function DriveDistance(Vehicle, additionalKm)
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
 
-		if now - SteerTimer > 5 then
+		if now - SteerTimer > 15 then
 			SteerTimer = now
-			if CurrentSteer == "Left" then
-				CurrentSteer = "Reset"
-				SteerLeftBind:Fire(CFrame.new(0.5, 0, 0))
-			elseif CurrentSteer == "Right" then
-				CurrentSteer = "Left"
-				SteerRightBind:Fire(CFrame.new(0.5, 0, 0))
-			elseif CurrentSteer == "Reset" then
-				CurrentSteer = "Right"
-				SteerRightBind:Fire(CFrame.new(0, 0, 0))
-				SteerLeftBind:Fire(CFrame.new(0, 0, 0))
-				
-			end
+			SteerLeftBind:Fire(CFrame.new(0.5, 0, 0))
+		end
+		
+		if now - SteerResetTimer > 16.5 then
+			SteerResetTimer = now
+			SteerLeftBind:Fire(CFrame.new(0, 0, 0))
 		end
 
 
@@ -1105,8 +1099,10 @@ function CleanUpUselessParts()
 		for _, mPart in pairs(MoveableParts:GetChildren()) do
 			if mPart:FindFirstChild("PartInfo") then
 				local Owner = mPart:GetAttribute("Owner")
-				if Owner == Player.Name and mPart.Name == "Injectors" or mPart.Name == "Sparkplugs" or mPart.Name == "TimingBelt" then
-					table.insert(Parts, mPart)
+				if Owner == Player.Name then
+					if mPart.Name == "Injectors" or mPart.Name == "Sparkplugs" or mPart.Name == "TimingBelt" then
+						table.insert(Parts, mPart)
+					end
 				end
 			end
 		end
