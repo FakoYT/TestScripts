@@ -1291,40 +1291,16 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 	return RepairingParts
 end
 
-local PendingParts = {}
 workspace.MoveableParts.ChildAdded:Connect(function(part)
 	task.wait(0.2)
 	if part:GetAttribute("Owner") == Player.Name then
-		table.insert(PendingParts, part)
+		local droppedAt = part:GetAttribute("DroppedAt")
+		local serverNow = workspace:GetServerTimeNow()
+		local diff = droppedAt and (serverNow - droppedAt) or nil
+		print("[PartGuard]", part.Name, "| DroppedAt:", droppedAt, "| Diff:", diff)
+		-- Set time for parts
 	end
 end)
-
-workspace.MoveableParts.ChildRemoved:Connect(function(part)
-	if part:GetAttribute("Owner") == Player.Name then
-		if #PendingParts > 0 then
-			for _, Tpart in pairs(PendingParts) do
-				if Tpart == part then
-					table.remove(PendingParts, table.find(PendingParts, part))
-				end
-			end
-		end
-	end
-end)
-
-function WaitForPartDrop(partName, timeout)
-	local elapsed = 0
-	while elapsed < (timeout or 5) do
-		for i, part in pairs(PendingParts) do
-			if part.Name == partName then
-				table.remove(PendingParts, i)
-				return part
-			end
-		end
-		task.wait(0.2)
-		elapsed += 0.2
-	end
-	return nil
-end
 
 function FixParts()
 	local CurrentCar = GetCurrentCar()
@@ -1354,12 +1330,7 @@ function FixParts()
 			
 			for _, partName in pairs(VehicleParts) do
 				RemovePart(CurrentCar, partName)
-				local dropped = WaitForPartDrop(partName, 5)
-				if dropped then
-					DebugPrint("Part dropped: " .. partName)
-				else
-					DebugWarn("Part not dropped in time: " .. partName)
-				end
+				task.wait(0.3)
 			end
 		end
 
