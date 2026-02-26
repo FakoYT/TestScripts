@@ -461,71 +461,126 @@ function DriveDistance(Vehicle, additionalKm)
 	local FakePlate = game.Workspace:FindFirstChild("DrivingPlatePart")
 
 	FakePlate.Position = FakePlatePosition
-
 	teleportBrokenCar(Vehicle, FakePlate.CFrame * CFrame.new(0, 5, 0))
 
-	-- 2. KONFIGURACJA SILNIKÓW I SKRĘTU
-	local motors = {}
+	task.wait(0.5) -- daj czas na teleport zanim weźmiemy kierunek
 
+	-- Zapamiętaj docelowy kierunek jazdy (prosto od miejsca startu)
+	local drivingYaw = math.atan2(
+		seat.CFrame.LookVector.X,
+		seat.CFrame.LookVector.Z
+	)
+
+	local motors = {}
 	for _, child in pairs(wheels:GetDescendants()) do
 		if child:IsA("HingeConstraint") then
 			if child.Name == "#AV" or child.Name == "#BV" then
 				table.insert(motors, child)
 				child.ActuatorType = Enum.ActuatorType.Motor
-					--elseif child.Name == "#SV" then -- #SV to zazwyczaj Steer Version (Servo)
-					--	table.insert(steeringHinges, child)
-					--	child.ActuatorType = Enum.ActuatorType.Servo
 			end
-			
 		end
 	end
 
 	local mileageVal = Player.PlayerData.Status.KMs
 	local targetKm = tonumber(mileageVal.Value) + additionalKm
 
-	local pbrakeTimer = tick()
-	local SteerTimer = tick()
+	local pbrakeTimer     = tick()
+	local SteerTimer      = tick()
 	local SteerResetTimer = tick()
+	local SteerCorrectTimer = tick()
 
-	local CurrentSteer = "Left"
+	-- Fazy skrętu: "straight" | "turning" | "correcting"
+	local steerPhase = "straight"
+	local steerDirection = 1  -- 1 = lewo, -1 = prawo, naprzemiennie
 
-	local SteerLeftBind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerLeft")
-	local pbind = game:GetService("ReplicatedStorage"):WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
+	local SteerLeftBind = game:GetService("ReplicatedStorage")
+		:WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("SteerLeft")
+	local pbind = game:GetService("ReplicatedStorage")
+		:WaitForChild("ClientScripts").Client.Binds.Cache:WaitForChild("PBrake")
+
+	-- STAŁA: jak bardzo auto może odchylić się zanim auto-korekta wciśnie
+	local MAX_YAW_DRIFT = math.rad(8) -- 8 stopni tolerancji
 
 	while tonumber(mileageVal.Value) < targetKm do
 		local now = tick()
-		-- 3. USTAWIANIE PRĘDKOŚCI (Brute Force)
-		-- 300-500 w AngularVelocity powinno dać dużą prędkość
+
+		-- 1. SILNIKI
 		for _, motor in pairs(motors) do
-			motor.MotorMaxTorque = 1e7
+			motor.MotorMaxTorque       = 1e7
 			motor.MotorMaxAcceleration = 1e5
-			motor.AngularVelocity = 350 
+			motor.AngularVelocity      = 350
 		end
 
-
+		-- 2. PBRAKE (utrzymanie traction)
 		if now - pbrakeTimer > 0.1 then
 			pbrakeTimer = now
 			pbind:Fire(Vector3.new(0, 0, 1))
 		end
 
-		if now - SteerTimer > 10 then
-			SteerTimer = now
-			SteerLeftBind:Fire(CFrame.new(0.5, 0, 0))
-		end
-		
-		if now - SteerResetTimer > 11.5 then
-			SteerResetTimer = now
+		-- 3. STABILIZACJA ANGULAR VELOCITY — kluczowe dla anty-driftu
+		--    Zeruje boczne obroty pojazdu co klatkę
+		local av = seat.AssemblyAngularVelocity
+		seat.AssemblyAngularVelocity = Vector3.new(
+			av.X * 0.3,   -- tłumi przechylanie
+			av.Y * 0.4,   -- tłumi yaw (kręcenie) — główna przyczyna driftu
+			av.Z * 0.3
+		)
+
+		-- 4. AUTOKOREKTA KURSU
+		--    Sprawdza czy auto nie odchyliło się od prostego kierunku
+		local currentYaw = math.atan2(
+			seat.CFrame.LookVector.X,
+			seat.CFrame.LookVector.Z
+		)
+		local yawDiff = currentYaw - drivingYaw
+		-- Normalizuj do [-pi, pi]
+		while yawDiff >  math.pi do yawDiff = yawDiff - 2 * math.pi end
+		while yawDiff < -math.pi do yawDiff = yawDiff + 2 * math.pi end
+
+		if steerPhase == "straight" and math.abs(yawDiff) > MAX_YAW_DRIFT then
+			-- Auto odchyliło się — delikatna korekta
+			local correction = yawDiff > 0 and -0.15 or 0.15
+			SteerLeftBind:Fire(CFrame.new(correction, 0, 0))
+			SteerCorrectTimer = now
+		elseif steerPhase == "straight" and now - SteerCorrectTimer > 0.3 then
+			-- Wróć do zera jeśli korekta zakończona
 			SteerLeftBind:Fire(CFrame.new(0, 0, 0))
 		end
 
+		-- 5. ZAPLANOWANE DELIKATNE SKRĘTY (co ~15 sekund)
+		if steerPhase == "straight" and now - SteerTimer > 15 then
+			steerPhase    = "turning"
+			SteerTimer    = now
+			-- Delikatna wartość 0.18–0.25 (zamiast 0.5 — było za dużo!)
+			local turnVal = 0.2 * steerDirection
+			SteerLeftBind:Fire(CFrame.new(turnVal, 0, 0))
+		end
 
-		-- 5. STABILIZACJA (CFrame)
+		-- Zakończ skręt po 1.2s i zacznij prostowanie
+		if steerPhase == "turning" and now - SteerTimer > 1.2 then
+			steerPhase      = "correcting"
+			SteerResetTimer = now
+			SteerLeftBind:Fire(CFrame.new(0, 0, 0))
+			steerDirection  = -steerDirection -- następny skręt w drugą stronę
+		end
+
+		-- Wróć do "straight" po 0.5s prostowania
+		if steerPhase == "correcting" and now - SteerResetTimer > 0.5 then
+			steerPhase = "straight"
+			SteerTimer = now -- reset timera żeby nie skręcać od razu
+			-- Zaktualizuj "bazowy kierunek" po skręcie
+			drivingYaw = math.atan2(
+				seat.CFrame.LookVector.X,
+				seat.CFrame.LookVector.Z
+			)
+		end
+
+		-- 6. PŁYTA POD AUTEM
 		local rootPos = seat.Position
-
-		-- Przesuwamy płytę pod auto
 		FakePlate.CFrame = CFrame.new(rootPos.X, FakePlatePosition.Y, rootPos.Z)
 
 		task.wait()
+
 		if AutoFarm == false then
 			for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 			for _, s in pairs(Vehicle:GetDescendants()) do
@@ -538,7 +593,6 @@ function DriveDistance(Vehicle, additionalKm)
 		end
 	end
 
-	-- 6. PRZYWRACANIE (Opcjonalne, jeśli chcesz potem jeździć normalnie)
 	for _, motor in pairs(motors) do motor.AngularVelocity = 0 end
 	for _, s in pairs(Vehicle:GetDescendants()) do
 		if s:IsA("LocalScript") and (s.Name == "Drive" or s.Name == "Interface") then
