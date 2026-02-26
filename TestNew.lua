@@ -1143,7 +1143,8 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 
 		Detector = Machine:FindFirstChild("Detector")
 		if Machine and Detector and Rpart.PrimaryPart then
-			Rpart.PrimaryPart.CFrame = Detector.CFrame
+			Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			Rpart:PivotTo(Detector.CFrame)
 			task.wait(0.2)
 			local Button = Machine:FindFirstChild("Button")
 			local Drill = Machine:FindFirstChild("Drill")
@@ -1155,7 +1156,8 @@ function StartGrindingMachines(ToGrindParts, GMachinesTable, RepairingParts)
 					if Rpart.PrimaryPart then
 						fireclickdetector(Button:FindFirstChild("ClickDetector"))
 						task.wait(0.3)
-						Rpart.PrimaryPart.CFrame = Detector.CFrame
+						Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						Rpart:PivotTo(Detector.CFrame)
 						RepeatCount += 1
 					else
 						break
@@ -1198,7 +1200,8 @@ function StartWashingMachines(ToWashParts, PWashersTable, RepairingParts)
 
 		Detector = Machine:FindFirstChild("Detector")
 		if Machine and Detector and Rpart.PrimaryPart then
-			Rpart.PrimaryPart.CFrame = Detector.CFrame
+			Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			Rpart:PivotTo(Detector.CFrame)
 			task.wait(0.2)
 
 			local Button = Machine:FindFirstChild("Faucet")
@@ -1212,7 +1215,8 @@ function StartWashingMachines(ToWashParts, PWashersTable, RepairingParts)
 					if Rpart.PrimaryPart then
 						fireclickdetector(Button:FindFirstChild("ClickDetector"))
 						task.wait(0.3)
-						Rpart.PrimaryPart.CFrame = Detector.CFrame
+						Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						Rpart:PivotTo(Detector.CFrame)
 						RepeatCount += 1
 					else
 						break
@@ -1252,7 +1256,8 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 
 		Detector = Machine:FindFirstChild("Detector")
 		if Detector and Rpart.PrimaryPart then
-			Rpart.PrimaryPart.CFrame = Detector.CFrame
+			Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+			Rpart:PivotTo(Detector.CFrame)
 			task.wait(0.2)
 
 			local Button = Machine:FindFirstChild("Button")
@@ -1269,7 +1274,8 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 					if Rpart.Parent and Rpart.PrimaryPart then
 						fireclickdetector(Button:FindFirstChild("ClickDetector"))
 						task.wait(0.3)
-						Rpart.PrimaryPart.CFrame = Detector.CFrame
+						Rpart.PrimaryPart.AssemblyLinearVelocity = Vector3.new(0, 0, 0)
+						Rpart:PivotTo(Detector.CFrame)
 						RepeatCount += 1
 					else
 						break
@@ -1292,13 +1298,22 @@ function StartChargingMachines(ToChargeParts, BChargersTable, RepairingParts)
 end
 
 workspace.MoveableParts.ChildAdded:Connect(function(part)
-	task.wait(0.2)
+	if not part:GetAttribute("Owner") then
+		task.wait(0.1)
+		if not part:GetAttribute("Owner") then return end
+	end
+	
 	if part:GetAttribute("Owner") == Player.Name then
 		local droppedAt = part:GetAttribute("DroppedAt")
 		local serverNow = workspace:GetServerTimeNow()
 		local diff = droppedAt and (serverNow - droppedAt) or nil
+
 		print("[PartGuard]", part.Name, "| DroppedAt:", droppedAt, "| Diff:", diff)
-		-- Set time for parts
+
+		if diff and (diff > 500 or diff < -1) then
+			part:SetAttribute("DroppedAt", nil)
+			DebugWarn("[PartGuard] Saved: " .. part.Name .. " | Diff: " .. diff)
+		end
 	end
 end)
 
