@@ -1151,7 +1151,7 @@ function CleanUpUselessParts()
 
 		if #Parts > 0 and #Parts > 5 then
 			for _, mPart in pairs(Parts) do
-				if mPart.PrimaryPart then
+				if mPart.PrimaryPart and TrashPart.PrimaryPart then
 					mPart.PrimaryPart.CFrame = TrashPart.PrimaryPart.CFrame
 					task.wait(0.2)
 				else
@@ -1799,6 +1799,7 @@ while true do
 						DebugPrint("Trying to install needed parts")
 					end
 					task.wait(0.2)
+					-- CleanUpUselessParts() change that later to deleting parts not to teleporting parts
 					if currentCar.Name and not table.find(AlreadyDrivenCars, currentCar.Name) then
 						local AutoDrive = DriveDistance(currentCar, math.random(0.8, 2))
 						if not AutoDrive then
@@ -1827,7 +1828,6 @@ while true do
 							end
 							DebugPrint("--- CAR SOLD ---")
 							task.wait(1)
-							CleanUpUselessParts() -- not working I think
 						else
 							DebugWarn("[Main Loop] - Selling error, retrying...")
 						end
